@@ -52,4 +52,5 @@ body {
 
 .launcher-icon {
   margin: 1em 0 0 1em;
+  cursor: pointer;
 }
