@@ -1,0 +1,4 @@
+resource kixx ./
+content kixx ./
+overlay chrome://browser/content/browser.xul chrome://kixx/content/boot/overlay.xul
+style chrome://global/content/customizeToolbar.xul chrome://kixx/content/firefox/toolbar-button.css

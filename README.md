@@ -15,9 +15,9 @@ The main goal of Kixx is to provide a simple means of installing, persisting,
 importing, and managing client side modules including code libraries and user
 facing toolpack applications.  The philosophy behind Kixx is to maintain an
 extremely modular environment, facilitating more efficient and innovative
-development of complex Internet enabled software systems using with web
-browsers as the platform. The Kixx environment is designed to use common
-web technologies including (X)HTML, CSS, and JavaScript.
+development of complex Internet enabled software systems using web browsers as
+the platform. The Kixx environment is designed to use common web technologies
+including (X)HTML, CSS, and JavaScript.
 
 Kixx plans to be compatible with Google Chrome, but it is currently only
 implemented for the Mozilla platform, specifically the Firefox Web Browser.
