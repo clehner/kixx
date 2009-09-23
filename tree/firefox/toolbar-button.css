@@ -1,0 +1,9 @@
+/*  skin/toolbar-button.css  */
+
+#kixx-launcher-toolstrip {
+  list-style-image: url("chrome://kixx/content/firefox/toolbar-button-24.png");
+}
+
+toolbar[iconsize="small"] #kixx-launcher-toolstrip {
+  list-style-image: url("chrome://kixx/content/firefox/toolbar-button-16.png");
+}
