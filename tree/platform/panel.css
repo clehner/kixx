@@ -1,6 +1,7 @@
 body {
   margin: 0;
   background: #eab801;
+  /* todo: fonts too big on windows */
 }
 
 #content {

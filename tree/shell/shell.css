@@ -1,6 +1,7 @@
 * { padding: 0; margin: 0; }
 
 body {
+  /* todo: fonts too big on windows */
   padding: 1em;
   font: bold 1em "Terminus", "Lucida Console", "Terminal", "Courier New", Courier, fixed, sans-serif;
   color: #0c0;

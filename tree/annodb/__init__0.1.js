@@ -163,6 +163,7 @@ function getConnection()
     db.executeSimpleSQL(SQLITE_SCHEMA);
 
   return db;
+  // todo: how do we remove this db on uninstall???
 }
 
 function sanitizeValue(aValue) {
