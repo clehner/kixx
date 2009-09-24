@@ -25,22 +25,31 @@ function openNewTab(aProps, aCallback)
 
 function installToolbarButton(aChromeWin)
 {
-  aChromeWin.addEventListener("load",
-    function firefox_installToolbarButton(e)
-    {
-      // todo: there should be a constant for the toolbar-button id
-      let buttonId = "kixx-launcher-toolstrip";
+  // todo: there should be a constant for the toolbar-button id
+  let buttonId = "kixx-launcher-toolstrip";
 
-      let platform = require("platform", "0.1");
-
+  function addToolbarButtonListener()
+  {
+    // todo: using this method of event registration, if the user removed the
+    // toolbar button, and then replaces it, the event will have never been
+    // registered.
+    try {
       // add the event listener
       aChromeWin.document.getElementById(buttonId).
         addEventListener("command",
         function onToolbarButtonCommand(e) {
-          platform.launcher.open();
+          require("platform", "0.1").launcher.open();
         }, true);
-        
+      // todo: maybe the import of the 'platform' module should go
+      // outside this function
+    } catch(e) {
+      // if the user has removed the button, it will not be there.
+    }
+  }
 
+  aChromeWin.addEventListener("load",
+    function firefox_installToolbarButton(e)
+    {
       // lazy import of annodb to prevent
       // circular dependency and infinite recursion
       let annodb = require("annodb", "0.1");
@@ -51,7 +60,10 @@ function installToolbarButton(aChromeWin)
 
         // if this script has run before, we don't want to re-install
         // a toolbar button that the user removed
-        if(!success || !result) return;
+        if(!(success ^ result)) {
+          addToolbarButtonListener();
+          return;
+        }
 
         // this routine works for firefox only, no other apps are supported
         // (some easy tweaks should get it to work on onther Moz apps)
@@ -63,8 +75,10 @@ function installToolbarButton(aChromeWin)
 
         // if the toolbar button is already there,
         // we don't want to re-install it.
-        if(currentSet.indexOf(buttonId) != -1)
-          return true;
+        if(currentSet.indexOf(buttonId) != -1) {
+          addToolbarButtonListener();
+          return;
+        }
 
 
         let set = "";
@@ -87,7 +101,8 @@ function installToolbarButton(aChromeWin)
         catch (e) { }
         annodb.set("toolbar-button-installed", 1, MOZID, function(){});
 
-        return true;
+        addToolbarButtonListener();
+        return;
       });
   },
   false);
