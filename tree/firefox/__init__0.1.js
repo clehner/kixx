@@ -110,11 +110,15 @@ function installToolbarButton(aChromeWin)
 
 /**
  */
-var download = {};
+var net = {};
 
 /**
  */
-download.simplefetch = function download_simplefetch(url, target, aOnProgress, aOnComplete)
+var net.download = {};
+
+/**
+ */
+net.download.simplefetch = function download_simplefetch(url, target, aOnProgress, aOnComplete)
 {
   let uri = Components.classes["@mozilla.org/network/io-service;1"]
                 .getService(Components.interfaces.nsIIOService)

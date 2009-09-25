@@ -2,4 +2,10 @@
 // before requiring the platform utils
 var platformUtils = require("firefox", "0.1");
 
-var simplefetch = platformUtils.download.simplefetch;
+/**
+ */
+var download = {};
+
+/**
+ */
+download.simplefetch = platformUtils.download.simplefetch;
