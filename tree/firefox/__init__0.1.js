@@ -229,3 +229,28 @@ file.read = function file_read(file)
 
   return data;
 };
+
+/**
+ */
+file.contents = function file_contents(file)
+{
+  if(!(file instanceof Components.interfaces.nsIFile)) {
+    throw new Error(
+        "file.contents() expects a file object as the single parameter");
+  }
+  if(!file.isDirectory)
+    throw new Error("file.contents() expects a directory file object");
+
+  let entries = file.directoryEntries;
+  let list = [];
+
+  while(entries.hasMoreElements())
+  {
+    let file = entries.getNext();
+    file.QueryInterface(Components.interfaces.nsIFile);
+    list.push(file);
+  }
+
+  // todo: how cool would it be to return an iterator instead???
+  return list;
+};
