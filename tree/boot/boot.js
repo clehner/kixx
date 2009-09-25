@@ -11,7 +11,7 @@
   let em = Components.classes["@mozilla.org/extensions/manager;1"].
            getService(Components.interfaces.nsIExtensionManager);
   let file = em.getInstallLocation("kixx@fireworksproject.com")
-    .getItemFile("kixx@fireworksproject.com", "init");
+    .getItemLocation("kixx@fireworksproject.com");
   let entries = file.directoryEntries;
 
   // for each init script:
@@ -19,7 +19,16 @@
   {
     let init = entries.getNext();
     init.QueryInterface(Components.interfaces.nsIFile);
-    let url = "resource://kixx/init/"+ init.leafName;
+
+    // we are only interested in directories
+    if(init.isFile()) continue;
+
+    let url = "resource://kixx/"+ init.leafName;
+    
+    // we are only interested in the init.js file if it exists
+    init.append("init.js");
+    if(!init.exists() || !init.isFile()) continue;
+    url += "/init.js";
 
     var sl = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
       .getService(Components.interfaces.mozIJSSubScriptLoader);
