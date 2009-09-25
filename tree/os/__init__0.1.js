@@ -5,5 +5,6 @@ var platformUtils = require("firefox", "0.1");
 var file = {
   open: platformUtils.file.open,
   read: platformUtils.file.read,
+  write: platformUtils.file.write,
   contents: platformUtils.file.contents
 };
