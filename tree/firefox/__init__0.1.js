@@ -108,6 +108,75 @@ function installToolbarButton(aChromeWin)
   false);
 }
 
+/**
+ */
+var download = {};
+
+/**
+ */
+download.simplefetch = function download_simplefetch(url, target, aOnProgress, aOnComplete)
+{
+  let uri = Components.classes["@mozilla.org/network/io-service;1"]
+                .getService(Components.interfaces.nsIIOService)
+                .newURI(url, null, null);
+  
+  let nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+  let persist = Components.
+    classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].
+    createInstance(nsIWBP);
+  persist.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE |
+                         nsIWBP.PERSIST_FLAGS_NO_CONVERSION |
+                         nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES |
+                         nsIWBP.PERSIST_FLAGS_CLEANUP_ON_FAILURE;
+
+  persist.progressListener =
+  {
+    onProgressChange: function onProgressChange(aWebProgress,
+                          aRequest,
+                          aCurSelfProgress,
+                          aMaxSelfProgress,
+                          aCurTotalProgress,
+                          aMaxTotalProgress)
+    {
+      /*
+      kdump(aWebProgress +", "+
+            aRequest +", "+
+            aCurSelfProgress +", "+
+            aMaxSelfProgress +", "+
+            aCurTotalProgress +", "+
+            aMaxTotalProgress);
+            */
+
+      if(aMaxSelfProgress == -1)
+        aOnProgress(-1);
+
+      else if(aCurSelfProgress > 0)
+        aOnProgress((aCurSelfProgress / aMaxSelfProgress) * 100);
+
+      return true;
+    },
+
+    onStatusChange: function onStatusChange(aWebProgress, aRequest, aStatus, aMessage)
+    {
+      //kdump(aWebProgress +", "+ aRequest +", "+
+       //     aStatus +", "+ aMessage);
+      // no operation
+      return true;
+    },
+
+    onStateChange: function onStateChange(aWebProgress, aRequest, aState, aStatus)
+    {
+      //kdump(""+ aWebProgress +", "+ aRequest.isPending() +", "+ aStatus +", "+ aStatus);
+
+      if(!aRequest.isPending())
+        aOnComplete();
+      return true;
+    }
+  };
+
+  // do the save
+  persist.saveURI(uri, null, null, null, "", target);
+};
 
 /**
  * @namespace
