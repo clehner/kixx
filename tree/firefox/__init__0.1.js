@@ -173,7 +173,7 @@ net.download.simplefetch = function download_simplefetch(url, target, aOnProgres
       //kdump(""+ aWebProgress +", "+ aRequest.isPending() +", "+ aStatus +", "+ aStatus);
 
       if(!aRequest.isPending())
-        aOnComplete();
+        aOnComplete(target);
       return true;
     }
   };
