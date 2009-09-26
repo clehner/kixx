@@ -1,25 +1,31 @@
 var gFile = require("os", "0.1").file;
+var mem = require("memcache", "0.1");
 
 var PREFS = "kixx-settings.json";
 var MEMKEY = "KIXX-SETTINGS";
+var NS = "kixx@fireworksproject.com";
 
 /**
  */
-function fetch()
+function fetch(key)
 {
-  return require("memcache", "0.1")
-    .get(MEMKEY, "kixx@fireworksproject.com");
+  // todo: we need parameter checking here
+  var settings = getSettings();
+  return settings[key] || null;
 }
 
 /**
  */
-function save(aValue)
+function save(key, value)
 {
-  // todo: we need exception handling here
-  gFile.write(JSON.stringify(aValue));
+  // todo: we need parameter checking here
+  var settings = getSettings();
+  settings[key] = value;
 
-  require("memcache", "0.1")
-    .set(MEMKEY, aValue, 0, "kixx@fireworksproject.com");
+  // todo: we need exception handling here
+  var file = loc()[1];
+  gFile.write(file, JSON.stringify(settings));
+  mem.set(MEMKEY, settings, 0, NS);
 }
 
 function load()
@@ -70,4 +76,13 @@ function loc()
 
 function install(file) {
   file.copyTo(gFile.open("Profile"), "");
+}
+
+function getSettings() {
+  var s = mem.get(MEMKEY, NS);
+  if(!s) {
+    load();
+    s = {};
+  }
+  return s;
 }
