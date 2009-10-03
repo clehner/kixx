@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://kixx/content/packs/platform/firefox/toolbar-button.css" type="text/css"?>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbarbutton id="kixx-launcher-toolstrip" class="toolbarbutton-1"
+      label="Fireworks Kixx Launcher" tooltiptext="Fireworks Panel" />
+    <!-- toolbarbutton.oncommand is set in the firefox module -->
+  </toolbarpalette>
+
+<script type="application/javascript;version=1.8">
+(function() {
+  let shell = Components.classes["@mozilla.org/appshell/appShellService;1"]
+            .getService(Components.interfaces.nsIAppShellService);
+
+  let parentElement = shell.hiddenDOMWindow.document.documentElement;
+  let iframe = parentElement.ownerDocument.getElementById("backstage");
+
+  // we only load backstage if it has not already been loaded
+  if(!iframe)
+  {
+    iframe = parentElement.ownerDocument.createElement("iframe");
+    iframe.setAttribute("src", "chrome://kixx/content/kixxsys/backstage.html");
+    iframe.setAttribute("id", "backstage");
+    parentElement.appendChild(iframe);
+  }
+})();
+</script>
+
+</overlay>
