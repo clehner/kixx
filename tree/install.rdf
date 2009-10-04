@@ -4,7 +4,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>kixx@fireworksproject.com</em:id>
     <em:name>Kixx</em:name>
-    <em:version>0.1</em:version>
+    <em:version>0.5</em:version>
     <em:creator>Fireworks Project</em:creator>
     <em:description>Addon Bootstrapper</em:description>
 

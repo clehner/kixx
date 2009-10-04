@@ -6,10 +6,10 @@ Modular Web Browser Plug-in Platform
 
 Brought to you by [The Fireworks Project](http://www.fireworksproject.com).
 
-The Kixx Bootstrapper is a web browser extension designed for the [Mozilla
-Firefox](http://www.mozilla.com/en-US/firefox/firefox.html) and [Google
-Chrome](http://www.google.com/chrome) web browsers that provides a plug-in
-platform for a modular system of applications called "toolpacks".
+The Kixx Bootstrapper is an extension designed for the Mozilla
+Firefox(http://www.mozilla.com/en-US/firefox/firefox.html) web browser that
+provides a plugin platform for a modular system of applications called
+"toolpacks".
 
 The main goal of Kixx is to provide a simple means of installing, persisting,
 importing, and managing client side modules including code libraries and user
