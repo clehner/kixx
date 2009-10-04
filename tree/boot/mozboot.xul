@@ -11,22 +11,25 @@
   </toolbarpalette>
 
 <script type="application/javascript;version=1.8">
-(function() {
-  let shell = Components.classes["@mozilla.org/appshell/appShellService;1"]
-            .getService(Components.interfaces.nsIAppShellService);
+window.addEventListener("load",
+  function mozboot() {
+    dump("chrome window loaded\n");
+    let shell = Components.classes["@mozilla.org/appshell/appShellService;1"]
+              .getService(Components.interfaces.nsIAppShellService);
 
-  let parentElement = shell.hiddenDOMWindow.document.documentElement;
-  let iframe = parentElement.ownerDocument.getElementById("backstage");
+    let parentElement = shell.hiddenDOMWindow.document.documentElement;
+    let iframe = parentElement.ownerDocument.getElementById("backstage");
 
-  // we only load backstage if it has not already been loaded
-  if(!iframe)
-  {
-    iframe = parentElement.ownerDocument.createElement("iframe");
-    iframe.setAttribute("src", "chrome://kixx/content/kixxsys/backstage.html");
-    iframe.setAttribute("id", "backstage");
-    parentElement.appendChild(iframe);
-  }
-})();
+    // we only load backstage if it has not already been loaded
+    if(!iframe)
+    {
+      iframe = parentElement.ownerDocument.createElement("iframe");
+      iframe.setAttribute("src", "chrome://kixx/content/kixxsys/backstage.html");
+      iframe.setAttribute("id", "backstage");
+      parentElement.appendChild(iframe);
+    }
+  },
+false);
 </script>
 
 </overlay>

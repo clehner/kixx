@@ -1,3 +1,4 @@
+// todo: replace dump() with logging functionality
 exports.MOZID = "kixx@fireworksproject.com";
 
 // !gotcha: this does not necessarily return the browser window
@@ -12,7 +13,7 @@ exports.getCurrentWindow = function getCurrentWindow(aCallback)
   }
   var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]  
              .getService(Components.interfaces.nsIWindowMediator);  
-  aCallback(wm.getMostRecentWindow(""));
+  aCallback(wm.getMostRecentWindow("navigator:browser"));
 }
 
 var tabs = {};
@@ -35,11 +36,13 @@ tabs.openNewTab = function openNewTab(aProps, aCallback)
 
 exports.installToolbarButton = function installToolbarButton(aChromeWin)
 {
+  dump("installing ui\n");
   // todo: there should be a constant for the toolbar-button id
   var buttonId = "kixx-launcher-toolstrip";
 
   function addToolbarButtonListener()
   {
+    dump("installing toolbar listener...");
     // todo: using this method of event registration, if the user removed the
     // toolbar button, and then replaces it, the event will have never been
     // registered.
@@ -50,7 +53,10 @@ exports.installToolbarButton = function installToolbarButton(aChromeWin)
         function onToolbarButtonCommand(e) {
           require("../launcher_1").open(function(){});
         }, true);
+      dump(" success\n");
     } catch(e) {
+      Components.utils.reportError(e);
+      dump(" skipped\n");
       // if the user has removed the button, it will not be there.
     }
   }
@@ -62,10 +68,20 @@ exports.installToolbarButton = function installToolbarButton(aChromeWin)
   // check to see if we have installed the button before
   annodb.get("toolbar-button-installed", exports.MOZID,
   function(success, result) {
+    dump("installing toolbar button...");
+    /*
+     * todo: remove this snippet
+    if(!success) {
+      dump("could not read annodb\n");
+      Components.utils.reportError(result);
+      return;
+    }
+    */
 
     // if this script has run before, we don't want to re-install
     // a toolbar button that the user removed
     if(!(success ^ result)) {
+      dump(" skipping\n");
       addToolbarButtonListener();
       return;
     }
@@ -81,6 +97,7 @@ exports.installToolbarButton = function installToolbarButton(aChromeWin)
     // if the toolbar button is already there,
     // we don't want to re-install it.
     if(currentSet.indexOf(buttonId) != -1) {
+      dump(" already done\n");
       addToolbarButtonListener();
       return;
     }
@@ -106,6 +123,7 @@ exports.installToolbarButton = function installToolbarButton(aChromeWin)
     catch (e) { }
     annodb.set("toolbar-button-installed", 1, exports.MOZID, function(){});
 
+    dump(" completed\n");
     addToolbarButtonListener();
     return;
   });

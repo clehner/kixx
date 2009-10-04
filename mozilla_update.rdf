@@ -33,7 +33,7 @@
   </RDF:Description>
 
   <RDF:Description about="urn:mozilla:extension:kixx@fireworksproject.com:0.5.a">
-    <em:version>0.1</em:version> <!-- This is the version number of the add-on -->
+    <em:version>0.5.a</em:version> <!-- This is the version number of the add-on -->
 
     <!-- One targetApplication for each application the add-on is compatible with -->
     <em:targetApplication>

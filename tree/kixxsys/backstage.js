@@ -253,6 +253,7 @@ function start()
   }
 
   var CHROME_LOADED = false;
+  CHROME_LOADED = true;
   var BACKGROUND_LOADED = false;
   var PACKMGR_INIT = false;
 
@@ -282,6 +283,8 @@ function start()
       },
       false);
 
+  /*
+   * todo: remove this snippet
   require("platform/windows_1").getCurrent(
     function returnChromeWindow(chromeWin)
     {
@@ -294,6 +297,7 @@ function start()
       false);
     }
   );
+  */
 
   pkg.init(function pkgmgr_init_callback()
       {
