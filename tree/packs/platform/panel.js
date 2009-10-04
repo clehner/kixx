@@ -7,7 +7,7 @@ function onWindowLoad(e)
   scr.src = "chrome://kixx/content/modules.js";
 
   // give some time for the require.js script to load
-  window.setTimeout(registerPanel, 20);
+  window.setTimeout(registerPanel, 100);
 }
 
 function registerPanel()
@@ -17,7 +17,6 @@ function registerPanel()
   // we are expecting only clean data from the launcher registry
   for(var i in reg) {
     appendLauncher(reg[i].icon, reg[i].handler);
-    dump(reg[i].icon +"\n"+ reg[i].handler +"\n");
   }
 }
 
