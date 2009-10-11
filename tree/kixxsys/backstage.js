@@ -5,6 +5,18 @@ var backstage = window;
 var cache = {};
 var modules = {};
 
+(function whatPlatform(Backstage)
+{
+  // todo: the platform object needs to dynamically detect what platform
+  // we are actually running on
+  // todo: FUEL only works for Firefox
+  // https://developer.mozilla.org/en/FUEL/Application#See_also
+  Backstage.platform = Components.classes["@mozilla.org/fuel/application;1"]
+    .getService(Components.interfaces.fuelIApplication);
+}
+)
+(backstage);
+
 function burning()
 {
   return false;
@@ -45,15 +57,14 @@ function ignition()
 {
   var CACHE = Backstage.cache.getOrCreateNamespace("KIXX_MODULE_CACHE");
 
+  // todo: should sys.window be included in the sys/system object???
   function System()
   {
     var system = {};
     system.print = function system_print(msg, label)
     {
-      // todo: better output formatting for sys.print();
-      // todo: platform agnostic sys.print(); (console.log() in Chromium)
       label = label || "log";
-      dump(label +": "+ msg +"\n");
+      Backstage.platform.console.log(label +": "+ msg +"\n");
     };
     return system;
   }
