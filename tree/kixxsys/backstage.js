@@ -76,12 +76,12 @@ function ignition()
       // will travel with it throughout it's life
       MAIN = MAIN || modID;
 
-      var exports = {}; // this object will become the module
+      CACHE[modID] = {}; // this object will become the module
+      var exports = CACHE[modID];
       var factory = loader.load(id);
       // todo: we need nested try / catch here to catch weird eval errors
       factory(Require(MAIN, newPath, modID), exports, System());
 
-      CACHE[modID] = exports;
       return exports;
     }
 
@@ -106,14 +106,8 @@ function ignition()
     {
       var req = null;
 
-      // if XHR is undefined, then we are on Mozilla
-      if(typeof XMLHttpRequest == "undefined")
-      {
-        req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
-          createInstance(Components.interfaces.nsIXMLHttpRequest);  
-      }
-      else // we can do this in Chromium
-        req = new XMLHttpRequest();
+      // todo: can we do this in Chromium and Mozilla???
+      req = new XMLHttpRequest();
 
       req.overrideMimeType("text/plain");
       req.open("GET", uri, false);
@@ -124,8 +118,7 @@ function ignition()
       } catch(e) {
         // todo: only handle the "not found" error
         // todo: system error handling should get logged errors
-        Components.utils.reportError(
-            new Error("require(): could not locate file at "+ uri));
+        throw new Error("require(): could not locate file at "+ uri);
       }
       return req.responseText;
     };
