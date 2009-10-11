@@ -6,3 +6,4 @@ exports.getCurrentWindow = platform.getCurrentWindow;
 exports.installToolbarButton = platform.installToolbarButton;
 exports.file = platform.file;
 exports.openNewTab = platform.tabs.openNewTab;
+exports.console = platform.console;

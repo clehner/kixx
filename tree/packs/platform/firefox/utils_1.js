@@ -16,6 +16,21 @@ exports.getCurrentWindow = function getCurrentWindow(aCallback)
   aCallback(wm.getMostRecentWindow("navigator:browser"));
 }
 
+var console = {};
+
+console.log = function console_log(a)
+{
+  if(typeof a != "string") a = a.toString();
+  var con = Components.classes["@mozilla.org/consoleservice;1"]  
+             .getService(Components.interfaces.nsIConsoleService);  
+  con.logStringMessage(a);
+};
+
+console.err = function console_err(a)
+{
+  Components.utils.reportError(a);
+};
+
 var tabs = {};
 
 // todo: make this follow the platform agnostic api in 'platform" module,
@@ -303,5 +318,6 @@ file.contents = function file_contents(file)
   return list;
 };
 
+exports.console = console;
 exports.file = file;
 exports.tabs = tabs;
