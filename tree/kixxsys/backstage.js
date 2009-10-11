@@ -80,7 +80,10 @@ function ignition()
       var exports = CACHE[modID];
       var factory = loader.load(id);
       // todo: we need nested try / catch here to catch weird eval errors
-      factory(Require(MAIN, newPath, modID), exports, System());
+      // todo: the second System() parameter is there for backward compatability
+      // with modules that use "system" instead of "sys" (Chiron), and should
+      // eventually be removed
+      factory(Require(MAIN, newPath, modID), exports, System(), System());
 
       return exports;
     }
@@ -125,8 +128,11 @@ function ignition()
 
     loader.evaluate = function evaluate(text, uri)
     {
+      // todo: the second System() parameter is there for backward compatability
+      // with modules that use "system" instead of "sys" (Chiron), and should
+      // eventually be removed
       text = (
-          "(function (require, exports, sys) {" +
+          "(function (require, exports, sys, system) {" +
               text +
           "})");
 
