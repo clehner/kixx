@@ -28,6 +28,7 @@ console.log = function console_log(a)
 
 console.err = function console_err(a)
 {
+  // todo: The line number for reported errors is incorrect
   Components.utils.reportError(a);
 };
 
