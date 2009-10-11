@@ -272,19 +272,20 @@ file.read = function file_read(file)
 
 /**
  */
-file.write = function file_write(aFile, aContent)
+file.write = function file_write(aFile, aContent, aAppend)
 {
   // todo: catch bad params
   //
   var fs = Components.classes["@mozilla.org/network/file-output-stream;1"].
              createInstance(Components.interfaces.nsIFileOutputStream);
 
-  // todo: add parameter to append
-  // use 0x02 | 0x10 to open file for appending.
-  fs.init(file, 0x02 | 0x08 | 0x20, 0666, 0); 
-  // write, create, truncate
-  // In a c file operation, we have no need to set file mode with or operation,
-  // directly using "r" or "w" usually.
+  if(aAppend)
+    // flags: read and write, create, append
+    fs.init(aFile, 0x02 | 0x08 | 0x10, 0666, 0); 
+
+  else
+    // flags: read and write, create, truncate 
+    fs.init(aFile, 0x02 | 0x08 | 0x20, 0666, 0); 
 
   var cs = Components.classes["@mozilla.org/intl/converter-output-stream;1"].
              createInstance(Components.interfaces.nsIConverterOutputStream);
