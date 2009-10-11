@@ -30,7 +30,8 @@ tabs.openNewTab = function openNewTab(aProps, aCallback)
       var tab = browser.addTab(url);
       if(selected)
         browser.selectedTab = tab;
-      aCallback(tab);
+
+      aCallback(browser.getBrowserForTab(tab).contentWindow);
     });
 }
 

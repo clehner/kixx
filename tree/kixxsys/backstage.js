@@ -30,7 +30,7 @@ function ignition()
   Backstage.cache.clearNamespace =
   function cache_clearNamespace(aNamespace)
   {
-    CACHE[aNamespace] = {};
+    delete CACHE[aNamespace];
   }
 
   Backstage.cache.clear =
@@ -253,6 +253,8 @@ function start()
   }
 
   var CHROME_LOADED = false;
+  // todo: On the Mozilla platform, this backstage window is not loaded until the "load" event
+  // for the main browser window is fired.  What happens with Chromium???
   CHROME_LOADED = true;
   var BACKGROUND_LOADED = false;
   var PACKMGR_INIT = false;
@@ -308,21 +310,21 @@ function start()
 }
 
 // clear the cache
-// todo: teardown() should also close opened windows/tabs to get
-// a true "restart" and prevent leaks
+// todo: teardown() should be a stub if we are on the Chromium platform
+// since it provides its own restart functionality
 function teardown()
 {
-  backstage.cache.clear();
+  // todo: teardown must close or reload all windows and tabs using require()
+  // to get a true restart and prevent leaks
+}
 
-  backstage.burning = function backstage_burning()
-  {
-    return false;
-  };
-
-  backstage.ignition = function backstage_ignition()
-  {
-    return false;
-  }
+// todo: restart() should be a stub if we are on the Chromium platform
+// since it provides its own restart functionality
+function restart()
+{
+  teardown();
+  var iframe = parent.document.getElementById("backstage");
+  iframe.contentWindow.location.reload(true);
 }
 
 // fire it up
