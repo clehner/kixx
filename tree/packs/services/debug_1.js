@@ -114,7 +114,7 @@ exports.assert = function assert(aCondition, aMessage, aError)
     throw err;
   }
 
-  return [aMessage, err, stack];
+  return new Assertion(aMessage, err, stack);
 }
 
 function AssertionError(aMessage)
@@ -123,5 +123,16 @@ function AssertionError(aMessage)
 }
 AssertionError.prototype = new Error;
 AssertionError.prototype.name = "AssertionError";
+
+function Assertion(aMessage, aErr, aStack)
+{
+  this.message = aMessage;
+  this.error = aErr;
+  this.stack = aStack;
+}
+Assertion.prototype.toString = function ()
+{
+  return this.message +"\n"+ this.stack;
+}
 
 exports.AssertionError = AssertionError;
