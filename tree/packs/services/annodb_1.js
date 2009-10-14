@@ -1,6 +1,6 @@
 // annotation memory
 
-const SQLITE_SCHEMA =
+var SQLITE_SCHEMA =
   ("CREATE TABLE annotations(" +
    "  namespace VARCHAR(256)," +
    "  namekey VARCHAR(256)," +
@@ -12,7 +12,7 @@ var memcache = require("./memcache_1");
 /**
  * Sets a key's value, regardless of previous contents in db.
  */
-// todo: annodb.get() should return some indication of success or failure,
+// todo: annodb.set() should return some indication of success or failure,
 // or even a reference pointer to the call.  What does chromium do?
 exports.set = function set(aKey, aValue, aNamespace, aCallback)
 {
@@ -135,7 +135,7 @@ exports.get = function get(aKey, aNamespace, aCallback)
         // todo: use debug module to handle this case with assert
         var msg = "annodb.get(): SQLite error: "+ err.message;
         Components.utils.reportError(msg);
-        aCallback(false, msg);
+        aCallback(false, new Error(msg));
       }
     });
   }
