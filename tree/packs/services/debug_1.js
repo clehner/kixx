@@ -101,20 +101,12 @@ exports.stack = function debug_stack(caller)
   return stackText;
 };
 
-exports.assert = function assert(aCondition, aMessage, aError)
+exports.assert = function assert(aCondition, aMessage)
 {
   if(aCondition) return true;
 
-  var err = new AssertionError(aMessage);
-
   var stack = exports.stack(assert);
-
-  if(aError) {
-    sys.print(aMessage +"\n  "+ stack, "AssertionError");
-    throw err;
-  }
-
-  return new Assertion(aMessage, err, stack);
+  throw new AssertionError(aMessage +"\n"+ stack);
 }
 
 function AssertionError(aMessage)
@@ -123,16 +115,5 @@ function AssertionError(aMessage)
 }
 AssertionError.prototype = new Error;
 AssertionError.prototype.name = "AssertionError";
-
-function Assertion(aMessage, aErr, aStack)
-{
-  this.message = aMessage;
-  this.error = aErr;
-  this.stack = aStack;
-}
-Assertion.prototype.toString = function ()
-{
-  return this.message +"\n"+ this.stack;
-}
 
 exports.AssertionError = AssertionError;
