@@ -1,3 +1,5 @@
+var console = require("platform/utils_1").console;
+
 /**
  */
 var CmdLine = {};
@@ -69,6 +71,7 @@ CmdLine.printStdout = function CmdLine_printStdout(s)
 // todo: use debug module to pretty print errors
 CmdLine.printError = function CmdLine_printError(e)
 {
+  console.err(e);
   this.println(e.toString(), "error");
 };
 
@@ -140,16 +143,6 @@ Utils.setTextareaRows = function Utils_setTextareaRows(textarea, input)
   }
   textarea.rows = input.split(/\n/).length;
 };
-
-/*
- * todo: remove this stuff
-Utils.run = function Utils_run(path, context)
-{
-  var uri = require.loader.normalize(require.loader.resolve(id));
-  var text = require.loader.fetch(uri);
-  context.eval(text);
-};
-*/
 
 function onWinLoad(e)
 {
