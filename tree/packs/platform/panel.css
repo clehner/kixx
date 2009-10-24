@@ -6,27 +6,19 @@ body {
 }
 
 #content {
-  float: left;
-  border: 1px dashed red;
+  float: right;
   width: 50%;
   padding: 1em 2% 1em 2%;
   background: #fff;
   color: #222;
   margin: 1.5em 0 2em 1.5em;
-  border: 2px solid #333;
-  -moz-border-radius: 20px;
-  font-family: Palatino, "Palatino Linotype", "DejaVu Serif", serif;
+  font-family: "Lucida Grande";
 }
 
 #bike {
-  float: left;
-  border: 2px solid #333;
-  -moz-border-radius: 20px;
-  text-align: center;
-  height: 370px;
-  width: 266px;
+  float: right;
   padding: 5px;
-  margin: 0 1.5em 1.5em 0;
+  margin: 0 0 1.5em 1.5em;
 }
 
 #header {
@@ -41,13 +33,13 @@ body {
 
 #panel {
   position: fixed;
-  top: 100px;
-  right: 0px;
+  top: 70px;
+  left: 0px;
   border-top: 2px solid #222;
   border-left: 2px solid #222;
   border-right: 2px solid #222;
-  -moz-border-radius-topleft: 15px;
-  -moz-border-radius-bottomleft: 15px;
+  -moz-border-radius-topright: 15px;
+  -moz-border-radius-bottomright: 15px;
   background: #222;
   width: 37%;
   height: 400px;
