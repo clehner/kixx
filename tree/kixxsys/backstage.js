@@ -205,28 +205,6 @@ function ignition()
     return loader;
   }
 
-  // todo: get rid of these tests
- /*
-  var xloader = Loader();
-  var factory = xloader.evaluate("exports.type = typeof(require);");
-  var ex = {};
-  factory(function (){}, ex, {});
-  dump(ex.type +"\n");
-
-  dump(xloader.resolve("base") +"\n");
-  dump(xloader.resolve("base_0.1") +"\n");
-  //dump(xloader.resolve(".bear") +"\n");
-  dump(xloader.resolve("./bear") +"\n");
-  //dump(xloader.resolve("..bear") +"\n");
-  dump(xloader.resolve("../bear") +"\n");
-  //dump(xloader.resolve("/bear") +"\n");
-  dump(xloader.resolve("foo/bear") +"\n");
-  dump(xloader.resolve("../foo/bear") +"\n");
-  dump(xloader.resolve("./foo/bear") +"\n");
-  //dump(xloader.resolve("..foo/bear") +"\n");
-  //dump(xloader.resolve(".foo/bear") +"\n");
-  */
-
   // getLoader() is injected to backstage.modules.getLoader().
   // It simply returns the module loader (require())
   Backstage.modules.getLoader =
@@ -237,6 +215,7 @@ function ignition()
 (backstage);
 
 backstage.require = backstage.modules.getLoader();
+backstage.log = require("services/log_1");
 
 // check to see if the system is already started by calling burning() and if
 // not, start the kixx system by importing utility modules and then loading the
@@ -245,17 +224,19 @@ function start()
 {
   // start cannot be called if the system has already been started
   if(backstage.burning()) {
-    dump("we're already burning\n");
+    backstage.log.warn("backstage.start() cannot be called if the system "+
+        "has already been started.");
     return;
   }
 
   // prevent multiple calls to start while the system is starting
   if(backstage.ignition()) {
-    dump("we already pushed the ignition button\n");
+    backstage.log.warn("backstage.start() cannot be called "+
+        "twice in one session.");
     return;
   }
 
-  dump("ignition\n");
+  backstage.log.info("backstage.start() ignition.");
 
   backstage.ignition = function backstage_ignition()
   {
@@ -276,7 +257,7 @@ function start()
     var packs = pkg.getUnpackedList();
     // todo: background object should handle cases where packages
     // do not have an init module 
-    dump("initializing packs\n");
+    backstage.log.info("backstage.start(): initializing packs.");
     for(var name in packs)
       require(name +"/init");
 
@@ -284,36 +265,20 @@ function start()
     {
       return true;
     };
-    dump("burning\n");
+    backstage.log.info("backstage.start(): burning.");
   }
 
   window.addEventListener("load", function handleBackstageLoad(e)
       {
-        dump("background loaded\n");
+        backstage.log.info("backstage.start(): background loaded.");
         BACKGROUND_LOADED = true;
         if(CHROME_LOADED && PACKMGR_INIT && BACKGROUND_LOADED) IGNITE();
       },
       false);
 
-  /*
-   * todo: remove this snippet
-  require("platform/windows_1").getCurrent(
-    function returnChromeWindow(chromeWin)
-    {
-      chromeWin.addEventListener("load", function handleChromeWinLoad(e)
-      {
-        dump("chrome window is loaded\n");
-        CHROME_LOADED = true;
-        if(CHROME_LOADED && PACKMGR_INIT && BACKGROUND_LOADED) IGNITE();
-      },
-      false);
-    }
-  );
-  */
-
   pkg.init(function pkgmgr_init_callback()
       {
-        dump("package manager is lit\n");
+        backstage.log.info("backstage.start(): package manager is lit.");
         PACKMGR_INIT = true;
         if(CHROME_LOADED && PACKMGR_INIT && BACKGROUND_LOADED) IGNITE();
       });
