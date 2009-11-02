@@ -494,7 +494,107 @@ var DumpOutputFormatter =
         +" "+ result.directive +" "+ result.reason
         +" "+ result.description +"\n\t# "+ result.diagnostic +"\n");
   }
-}
+};
+
+var ConsoleOutputFormatter =
+{
+  /**
+   * Called when a test suite begins to run.
+   * @param {string} name The name of the suite.
+   */
+  startSuite: function DOF_startSuite(name)
+  {
+    sys.print(" === Start Test Suite: "+ name +" ===", "simpletest");
+  },
+
+  /**
+   * Called when a test suite is finished.
+   * @param {object} result
+   */
+  endSuite: function DOF_endSuite(result)
+  {
+    sys.print(" === End Test Suite: "+ result.name +" ===", "simpletest");
+
+    for(var name in result.cases)
+    {
+      var cas = result.cases[name];
+      var report = "-> test case: "+ name +"\n";
+
+      var tests = result.cases[name].tests;
+      var failures = [t for each(t in tests) if(t.result != "ok")];
+
+      if(failures.length) {
+        report += "\t    failures:";
+        for(var i = 0; i < failures.length; i++) {
+          report += "\n\t      "+
+              failures[i].description +" "+ failures[i].result;
+        }
+      }
+      else
+        report += "\t    passed";
+    }
+    sys.print(report, "simpletest");
+  },
+
+  /**
+   * Called when a test case grouping is about to start.
+   * @param {string} name The name of the test case.
+   */
+  startCase: function DOF_startCase(name)
+  {
+    sys.print(" -- Test Case: "+ name +" --", "simpletest");
+  },
+
+  /**
+   * Called when all the tests in a test case have run.
+   * @param {object} result
+   */
+  endCase: function DOF_endCase(result)
+  {
+    //dump("** End Test Case *********************************************\n");
+  },
+
+  /**
+   * Called just before a test function is run.
+   * @param {string} desc The description of the test function.
+   */
+  startTest: function DOF_startTest(desc)
+  {
+    sys.print(" Testing: "+ desc, "simpletest");
+  },
+
+  /**
+   * Called when a test function has finished.
+   * @param {object} result
+   */
+  endTest: function DOF_endTest(result)
+  {
+    if(result.result == "error") 
+    {
+      sys.print("\n\n !Error: "+ result.error.name
+          +" '"+ result.error.message
+          +"'\n "+ result.error.fileName
+          +"\n line:"+ result.error.lineNumber, "simpletest");
+    }
+
+    sys.print("-- End Test --", "simpletest");
+  },
+
+  /**
+   * Called whenever a test point function is run.
+   * @param {object} result
+   */
+  testpoint: function DOF_testpoint(result)
+  {
+    if(!result.directive && result.result == "ok")
+      return;
+
+    sys.print(" "+ result.result +" "+ result.num
+        +" "+ result.directive +" "+ result.reason
+        +" "+ result.description +"\n\t# "+ result.diagnostic, "simpletest");
+  }
+};
 
 exports.TestSuite = TestSuite;
 exports.DumpOutputFormatter = DumpOutputFormatter;
+exports.ConsoleOutputFormatter = ConsoleOutputFormatter;

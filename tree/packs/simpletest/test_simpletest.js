@@ -1,7 +1,7 @@
 this.simpletest = require("simpletest/testrunner_1");
 
 var testsuite = new simpletest.TestSuite(
-    "simpletest", simpletest.DumpOutputFormatter);
+    "simpletest", simpletest.ConsoleOutputFormatter);
 
 function test_passing_ok(test)
 {
@@ -44,4 +44,6 @@ testsuite.addTest("Passing", test_passing_ok, "passing ok()");
 testsuite.addTest("Passing", test_passing_is, "passing is()");
 testsuite.addTest("Passing", test_passing_isnt, "passing isnt()");
 
-testsuite.run(function(){});
+exports.run = function javascript_tests_run() {
+  testsuite.run(function(){});
+};

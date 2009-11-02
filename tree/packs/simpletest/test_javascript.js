@@ -1,7 +1,7 @@
 this.simpletest = require("simpletest/testrunner_1");
 
 var testsuite = new simpletest.TestSuite(
-    "JavaScript", simpletest.DumpOutputFormatter);
+    "JavaScript", simpletest.ConsoleOutputFormatter);
 
 function test_Numbers(test)
 {
@@ -67,4 +67,6 @@ function test_Equality(test)
 testsuite.addTest("Numbers", test_Numbers, "How are numbers represented in JavaScript?");
 testsuite.addTest("Comparisons", test_Equality, "How does equality work?");
 
-testsuite.run(function(){});
+exports.run = function javascript_tests_run() {
+  testsuite.run(function(){});
+};
