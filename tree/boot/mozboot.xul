@@ -13,7 +13,6 @@
 <script type="application/javascript;version=1.8">
 window.addEventListener("load",
   function mozboot() {
-    dump("chrome window loaded\n");
     let shell = Components.classes["@mozilla.org/appshell/appShellService;1"]
               .getService(Components.interfaces.nsIAppShellService);
 

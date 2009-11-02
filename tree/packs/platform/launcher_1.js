@@ -11,7 +11,6 @@ exports.registry = function launcher_registry()
  */
 exports.reg = function launcher_registerIcon(aName, aImgURL, aHandler)
 {
-  dump("reg panel icon for: "+ aName +"\n");
   // todo: use error handling module
   if(typeof(aName) != "string") {
     throw new Error(
