@@ -525,9 +525,10 @@ var ConsoleOutputFormatter =
     report = "\n";
 
     for (casename in result.cases) {
-      report += casename;
+      report += casename +"\n";
       for (i = 0; i < result.cases[casename].tests.length; i++) {
         test = result.cases[casename].tests[i];
+        report += "  "+ test.description;
         if (test.result !== "ok") {
           report += " -> failed\n";
           for (p = 0; p < test.points.length; p ++) {
