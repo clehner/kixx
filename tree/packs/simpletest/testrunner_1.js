@@ -534,9 +534,9 @@ var ConsoleOutputFormatter =
           for (p = 0; p < test.points.length; p ++) {
             point = test.points[p];
             if (point.result !== "ok") {
-              report += "\t"+ point.num +" "+ point.description;
+              report += "\t"+ point.num +": "+ point.description;
               report += " "+ point.directive +" "+ point.reason;
-              report += "\n\t  # "+ point.diagnostic;
+              report += "\n\t  # "+ point.diagnostic +"\n";
             }
           }
         } else {
@@ -602,9 +602,9 @@ var ConsoleOutputFormatter =
     if(!result.directive && result.result == "ok")
       return;
     // we only care about failed test points
-    sys.print(result.result +" "+ result.num
+    sys.print(result.result +" "+ result.description
         +" "+ result.directive +" "+ result.reason
-        +"\n\t# "+ result.diagnostic, result.description);
+        +"\n\t# "+ result.diagnostic, result.num);
   }
 };
 
