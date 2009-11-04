@@ -3,6 +3,8 @@ this.eq = base.eq;
 
 /**
  * @constructor
+ * @param {String} name The name of the test suite
+ * @param {Object} out An output formatter object
  */
 function TestSuite(name, out)
 {
@@ -31,6 +33,12 @@ function TestSuite(name, out)
 }
 
 /**
+ * @param {String} testCase The name of the test case that this test function
+ * should belong to
+ * @param {Function} exec The test function itself
+ * @param {String} desc A description of the test function
+ * @param {Object} [fixture] A fixture object
+ * @param {Number} [timeout] Specified tim limit for this test in miliseconds
  */
 TestSuite.prototype.addTest =
 function TestSuite_addTest(testCase, exec, desc, fixture, timeout)
@@ -504,7 +512,7 @@ var ConsoleOutputFormatter =
    */
   startSuite: function COF_startSuite(name)
   {
-    sys.print(" === Start Test Suite: "+ name +" ===", "simpletest");
+    sys.print(name, "=== Start Test Suite ");
   },
 
   /**
@@ -513,9 +521,31 @@ var ConsoleOutputFormatter =
    */
   endSuite: function COF_endSuite(result)
   {
-    sys.print(" === End Test Suite: "+ result.name +" ===", "simpletest");
+    var i, p, report, casename, test, point, failed;
+    report = "\n";
 
-    sys.print(JSON.stringify(result), "simpletest");
+    for (casename in result.cases) {
+      report += casename;
+      for (i = 0; i < result.cases[casename].tests.length; i++) {
+        test = result.cases[casename].tests[i];
+        if (test.result !== "ok") {
+          report += " -> failed\n";
+          for (p = 0; p < test.points.length; p ++) {
+            point = test.points[p];
+            if (point.result !== "ok") {
+              report += "\t"+ point.num +" "+ point.description;
+              report += " "+ point.directive +" "+ point.reason;
+              report += "\n\t  # "+ point.diagnostic;
+            }
+          }
+        } else {
+          report += " -> passed\n";
+        }
+      }
+    }
+
+    sys.print(report, "test report");
+    sys.print(result.name, "=== End Test Suite ");
   },
 
   /**
@@ -524,7 +554,7 @@ var ConsoleOutputFormatter =
    */
   startCase: function COF_startCase(name)
   {
-    sys.print(" -- Case: "+ name +" --", "simpletest");
+    sys.print(name, "[Start Test Case]");
   },
 
   /**
@@ -542,7 +572,7 @@ var ConsoleOutputFormatter =
    */
   startTest: function COF_startTest(desc)
   {
-    sys.print(" Start Test: "+ desc, "simpletest");
+    sys.print(desc, "[Start Test]");
   },
 
   /**
@@ -553,13 +583,13 @@ var ConsoleOutputFormatter =
   {
     if(result.result == "error") 
     {
-      sys.print("!Error: "+ result.error.name
+      sys.print(result.error.name
           +" '"+ result.error.message
           +"'\n "+ result.error.fileName
-          +"\n line:"+ result.error.lineNumber, "simpletest");
+          +"\n line:"+ result.error.lineNumber, "exception detected");
     }
 
-    sys.print("-- End Test --", "simpletest");
+    sys.print(result.description, "[End Test]");
   },
 
   /**
@@ -571,9 +601,9 @@ var ConsoleOutputFormatter =
     if(!result.directive && result.result == "ok")
       return;
     // we only care about failed test points
-    sys.print(" "+ result.result +" "+ result.num
+    sys.print(result.result +" "+ result.num
         +" "+ result.directive +" "+ result.reason
-        +" "+ result.description +"\n\t# "+ result.diagnostic, "simpletest");
+        +"\n\t# "+ result.diagnostic, result.description);
   }
 };
 

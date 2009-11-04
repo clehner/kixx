@@ -30,6 +30,7 @@ function test_Equality(test)
   test.ok(10 === 10, "1 === 1");
   test.ok(12.0 === 12, "12.0 === 12");
   test.ok(0.1 === 0.10, "12.0 === 12");
+  test.ok('string' === "string", "'string' === 'string'");
 
   // weak types
   test.ok(1 == '1', "1 == '1'");
