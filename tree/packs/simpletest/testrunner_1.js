@@ -134,6 +134,11 @@ function TestSuite_run(aCallback)
     // build the test harness that will be passed to each test function
     testHarness.finished = function testFinished()
     {
+      if (test.complete) {
+        return;
+      }
+      test.complete = true;
+
       // if this test already timed out, we do nothing.
       if(test.timedOut)
         return;
@@ -157,6 +162,10 @@ function TestSuite_run(aCallback)
       testHarness[name] = vocab[name](
           function testpoint(result)
           {
+            if (test.complete) {
+              return;
+            }
+
             if(result.todo) {
               todo = result.num;
               todoReason = result.reason;
@@ -590,7 +599,7 @@ var ConsoleOutputFormatter =
           +"\n line:"+ result.error.lineNumber, "exception detected");
     }
 
-    sys.print(result.description, "[End Test]");
+    //sys.print(result.description, "[End Test]");
   },
 
   /**
