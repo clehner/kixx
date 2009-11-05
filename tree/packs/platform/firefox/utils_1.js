@@ -242,7 +242,12 @@ file.open = function file_open(aLoc)
   return Components.classes["@mozilla.org/file/directory_service;1"].
            getService(Components.interfaces.nsIProperties).
            get(loc, Components.interfaces.nsIFile);
-}
+};
+
+file.create = function file_create(aFile) {
+  aFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
+  return aFile;
+};
 
 // todo: there should be a max bytes parameter for this
 file.read = function file_read(file)
@@ -270,17 +275,19 @@ file.read = function file_read(file)
 file.write = function file_write(aFile, aContent, aAppend)
 {
   // todo: catch bad params
-  //
+
   var fs = Components.classes["@mozilla.org/network/file-output-stream;1"].
              createInstance(Components.interfaces.nsIFileOutputStream);
 
-  if(aAppend)
+  if(aAppend) {
     // flags: read and write, create, append
     fs.init(aFile, 0x02 | 0x08 | 0x10, 0666, 0); 
+  }
 
-  else
+  else {
     // flags: read and write, create, truncate 
     fs.init(aFile, 0x02 | 0x08 | 0x20, 0666, 0); 
+  }
 
   var cs = Components.classes["@mozilla.org/intl/converter-output-stream;1"].
              createInstance(Components.interfaces.nsIConverterOutputStream);
