@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+  <title>Treadmill: The code testing workout.</title>
+
+</head>
+
+<body>
+<div id="header">
+  <h1 id="title">Kixx Treadmill</h1>
+  <h2 id="sub-title">Give your toolpack code a workout with automated testing.</h2>
+</div>
+<div id="content">
+  <div id="inputs">
+    test document: <input id="file-input" name="manifest-input" type="text" />
+    <button onclick="go();">go</button>
+  </div>
+</div>
+</body>
+<script src="../modules.js"></script>
+<script>
+  function go() {
+    var url = "chrome://kixx/content/packs/";
+    url = url + document.getElementById('file-input').value;
+    require("platform/tabs_1")
+      .create({url: url});
+  }
+</script>
+</html>
