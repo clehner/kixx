@@ -396,7 +396,7 @@ var TestSimpleVocab =
     return todo;
   },
 
-  skip: function TestSimpleVocab_skip(why, howmany)
+  skip: function TestSimpleVocab_skip(callback)
   {
     function skip(why, howmany)
     {
