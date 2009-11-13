@@ -62,7 +62,7 @@ TM_TESTING.go = function go() {
     assert(div.lastChild.lastChild.tagName === "PRE",
          div.lastChild.lastChild.tagName +" !== pre");
 
-    TREADMILL.createTestSuite("Treadmill: test all pass, todo, skip", [
+    TREADMILL.createAndRunTestSuite("Treadmill: test all pass, todo, skip", [
         {
           test: function allPassTodoSkip(test) {
             test.ok(true, "passes");
@@ -77,7 +77,7 @@ TM_TESTING.go = function go() {
             test.finished();
           }
         }
-      ]).run(testAllPass);
+      ], testAllPass);
   }
 
   function testTimeout() {
@@ -92,7 +92,7 @@ TM_TESTING.go = function go() {
          div.lastChild.lastChild.nodeValue +" !== timed out");
 
     // create a test suite with a timeout
-    TREADMILL.createTestSuite("Treadmill: test error", [
+    TREADMILL.createAndRunTestSuite("Treadmill: test error", [
         {
           test: function test_error(test) {
             test.ok(false, "first fail", "reason");
@@ -103,7 +103,7 @@ TM_TESTING.go = function go() {
             test.finished();
           }
         }
-      ]).run(testError);
+      ], testError);
   }
 
   function testPassed() {
@@ -117,18 +117,18 @@ TM_TESTING.go = function go() {
     checkTestPoints(div.lastChild.childNodes, 2);
 
     // create a test suite with a timeout
-    TREADMILL.createTestSuite("Treadmill: test timeout", [
+    TREADMILL.createAndRunTestSuite("Treadmill: test timeout", [
         {
           test: function timeout(test) {
             test.ok(true, "passes");
             test.is(1, 1, "second pass");
           }
         }
-      ]).run(testTimeout);
+      ], testTimeout);
   }
 
   // create a failing test suite
-  TREADMILL.createTestSuite("Treadmill: tests fail", [
+  TREADMILL.createAndRunTestSuite("Treadmill: tests fail", [
       {
         test: function someFail(test) {
           test.ok(false, "first fail", "reason");
@@ -144,5 +144,5 @@ TM_TESTING.go = function go() {
           test.finished();
         }
       }
-    ]).run(testPassed);
+    ], testPassed);
 }

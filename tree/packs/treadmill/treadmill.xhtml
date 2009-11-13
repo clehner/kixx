@@ -7,27 +7,242 @@
 
   <title>Treadmill: The code testing workout.</title>
 
+  <style type="text/css">
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 2em;
+      font: 16px sans-serif;
+      color: #bbb;
+      background: #000;
+    }
+
+    a {
+      color: #369;
+    }
+
+    hr {
+      margin: 2em 0 1em 0;
+    }
+
+    #header {
+      font-family: sans-serif;
+      margin: 1em 17% 1em 12%;
+    }
+
+    #header > h1 {
+      font-size: 3em;
+    }
+
+    #header > h2 {
+      font-size: 1.5em;
+    }
+
+    .contenthead {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+
+    #content {
+      margin: 1em 17% 1em 12%;
+    }
+
+    #content > p {
+      margin-bottom: 1em;
+    }
+
+    h1.classTitle {
+      font-size: 1em;
+      background: #333;
+      color: #ddd;
+      padding: 0.5em;
+    }
+
+    div.fixedFont {
+      margin: 3em 0 0 0;
+      background: #333;
+      color: #ddd;
+      padding: 0.5em;
+    }
+
+    .description {
+      margin: 1em 0 1em 0;
+    }
+
+    .detailList {
+      font-size: 0.9em;
+      margin-bottom: 3em;
+    }
+
+    dt {
+      font-style: italic;
+    }
+
+    .heading {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    .light {
+      color: #777;
+    }
+  </style>
+
 </head>
 
 <body>
 <div id="header">
   <h1 id="title">Kixx Treadmill</h1>
-  <h2 id="sub-title">Give your toolpack code a workout with automated testing.</h2>
+  <h2 id="sub-title">Give your toolpack a workout with automated code testing.</h2>
 </div>
 <div id="content">
-  <div id="inputs">
-    test document: <input id="file-input" name="manifest-input" type="text" />
-    <button onclick="go();">go</button>
-  </div>
+  <p>
+  Treadmill is a JavaScript file that you can include into an html document to
+  create an automated JavaScript test suite and JavaScript code quality tool
+  for your toolpacks. By including <code>treadmill/treadmill.js</code> in an
+  html document you make that document into a "testrunner" application that can
+  be loaded into the browser to run your tests.
+  </p><p>
+  Treadmill currently supports Simpletest as its testing framework and also includes
+  <a href="http://jslint.com" target="_blank">JSLint</a>,
+  which is an awesome JavaScript code quality tool. Simpletest is automatically imported
+  for you when you make the <code>TREADMILL.createTestSuite()</code> function call
+  but to use JSLint you'll need to include the JSLint file in your testrunner html
+  document:
+  <code>&lt;script src="chrome://kixx/content/packs/jslint/fulljslint.js"&gt;&lt;/script&gt;</code>
+  </p><p>
+  To see an example of a testrunner html document check out the source to
+  <a href="chrome://kixx/content/packs/treadmill/test/test_treadmill.html">
+    packs/treadmill/test/test_treadmill.html
+  </a>.
+  </p>
+  <p>treadmill/treadmill.js provides the hooks to easily run JSLint
+  <a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
+  and Simpletest test suites on a toolpack.
+  </p><p>
+  <code>treadmill/treadmill.js</code> should be included in your testrunner
+  html document with <code>&lt;script
+  src="../treadmill/treadmill.js"...&gt;</code> or <code>&lt;script
+  src="chrome://kixx/content/packs/treadmill/treadmill.js"...&gt;</code>
+  </p><p>
+  Your testrunner html document must have a container (&lt;div&gt;) with the id
+  attribute "treadmill" where the results of the JSLint scans and Simpletest
+  output will be displayed.
+  </p><p>
+  Important!: <code>treadmill.js</code> injects the <code>require()</code>
+  function into the global namespace of the testrunner html document, enabling
+  use of the JavaScript module system within Kixx.
+  </p>
+  <hr />
+
+  <h3 class="contenthead">Source Documentation</h3>
+
+      <h1 class="classTitle">
+              Namespace TREADMILL
+      </h1>
+			<p class="description">
+				
+				
+			
+				The Treadmill application namespace which will be added to the
+global namespace.
+				
+				
+					<br /><i>Defined in: </i>treadmill.js.
+				
+			</p>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">TREADMILL.</span><b>createAndRunTestSuite</b>(aName, aTests, aCallback)
+					
+					</div>
+					<div class="description">
+						Create a Simpletest test suite and run it. The output from the tests will be
+written to the container element with id "treadmill" when the suite id done
+running.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{string}</span> <b>aName</b>
+									
+								</dt>
+								<dd>The name of the test group</dd>
+							
+								<dt>
+									<span class="light fixedFont">{object[]}</span> <b>aTests</b>
+									
+								</dt>
+								<dd>A list of objects with the following members
+ <br />{function} test The test function (will be passed the test
+ object)
+ <br />{integer} time The time limit for the test before it times out
+ in milliseconds</dd>
+							
+								<dt>
+									<span class="light fixedFont">{function}</span> <b>aCallback</b>
+									
+								</dt>
+								<dd>Will be called when the test suite is done running.</dd>
+							
+							</dl>
+						
+						
+						
+
+					<a name=".jslint"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">TREADMILL.</span><b>jslint</b>(aFile)
+					
+					</div>
+					<div class="description">
+						Scan a JavaScript file with JSLint
+<a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
+Will output the results as an html snippet onto your testrunner page.
+Important!: To use this feature, you need to include
+<code>&lt;script src="chrome://kixx/content/packs/jslint/fulljslint.js"&gt;&lt;/script&lt;</code>
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{string}</span> <b>aFile</b>
+									
+								</dt>
+								<dd>The location of the file using the same annotation
+as <code>require()</code>.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					
+				
+			
 </div>
 </body>
-<script src="../modules.js"></script>
-<script>
-  function go() {
-    var url = "chrome://kixx/content/packs/";
-    url = url + document.getElementById('file-input').value;
-    require("platform/tabs_1")
-      .create({url: url});
-  }
-</script>
 </html>

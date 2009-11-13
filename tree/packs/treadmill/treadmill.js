@@ -1,3 +1,22 @@
+/**
+ * @fileOverview <p>treadmill/treadmill.js provides the hooks to easily run JSLint
+ * <a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
+ * and Simpletest test suites on a toolpack.
+ * </p><p>
+ * <code>treadmill/treadmill.js</code> should be included in your testrunner
+ * html document with <code>&lt;script
+ * src="../treadmill/treadmill.js"...&gt;</code> or <code>&lt;script
+ * src="chrome://kixx/content/packs/treadmill/treadmill.js"...&gt;</code>
+ * </p><p>
+ * Your testrunner html document must have a container (&lt;div&gt;) with the id
+ * attribute "treadmill" where the results of the JSLint scans and Simpletest
+ * output will be displayed.
+ * </p><p>
+ * Important!: <code>treadmill.js</code> injects the <code>require()</code>
+ * function into the global namespace of the testrunner html document, enabling
+ * use of the JavaScript module system within Kixx.
+ */
+
 /*jslint
 onevar: true,
 undef: true,
@@ -22,9 +41,15 @@ var require = (function getRequire() {
       ownerDocument.getElementById("backstage").contentWindow.modules.getLoader();
 }());
 
+/**
+ * @namespace The Treadmill application namespace which will be added to the
+ * global namespace.
+ */
 var TREADMILL = {};
 
+/** @private */
 TREADMILL.appendOutput = (function createAppendOutput() {
+  /** @private */
   var that = function appendOutput(level, html) {
     var div = document.createElement("div");
     if (level === "failed") {
@@ -36,10 +61,12 @@ TREADMILL.appendOutput = (function createAppendOutput() {
     div.innerHTML = html;
   };
 
+  /** @private */
   that.passed = function failed(html) {
     that("passed", html);
   };
 
+  /** @private */
   that.failed = function passed(html) {
     that("failed", html);
   };
@@ -47,22 +74,13 @@ TREADMILL.appendOutput = (function createAppendOutput() {
   return that;
 }());
 
+/** @private */
 TREADMILL.testOutputFormatter =
 function createTestOutputFormatter(stdout) {
   // public methods
   return {
-
-    /**
-     * Called when a test suite begins to run.
-     * @param {string} name The name of the suite.
-     */
     startSuite: function startSuite(name) {
     },
-
-    /**
-     * Called when a test suite is finished.
-     * @param {object} result
-     */
     endSuite: function endSuite(results) {
       var passed = true, report;
 
@@ -134,45 +152,29 @@ function createTestOutputFormatter(stdout) {
         stdout.failed(report);
       }
     },
-
-    /**
-     * Called when a test case grouping is about to start.
-     * @param {string} name The name of the test case.
-     */
     startCase: function startCase(name) {
     },
-
-    /**
-     * Called when all the tests in a test case have run.
-     * @param {object} result
-     */
     endCase: function endCase(result) {
-      //dump("** End Test Case *********************************************\n");
     },
-
-    /**
-     * Called just before a test function is run.
-     * @param {string} desc The description of the test function.
-     */
     startTest: function startTest(desc) {
     },
-
-    /**
-     * Called when a test function has finished.
-     * @param {object} result
-     */
     endTest: function endTest(result) {
     },
-
-    /**
-     * Called whenever a test point function is run.
-     * @param {object} result
-     */
     testpoint: function testpoint(result) {
     }
   };
 };
 
+/**
+ * Scan a JavaScript file with JSLint
+ * <a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
+ * Will output the results as an html snippet onto your testrunner page.
+ * Important!: To use this feature, you need to include
+ * <code>&lt;script src="chrome://kixx/content/packs/jslint/fulljslint.js"&gt;&lt;/script&lt;</code>
+ *
+ * @param {string} aFile The location of the file using the same annotation
+ * as <code>require()</code>.
+ */
 TREADMILL.jslint = function jslint(aFile) {
   var url, result;
 
@@ -188,19 +190,26 @@ TREADMILL.jslint = function jslint(aFile) {
 };
 
 /**
- * @param {string} name The name of the test group 
- * @param {array} tests A list of objects with members
- *  - {function} test The test function (will be passed the test object)
- *  - {integer} time The time limit for the test before it times out
+ * Create a Simpletest test suite and run it. The output from the tests will be
+ * written to the container element with id "treadmill" when the suite id done
+ * running.
+ *
+ * @param {string} aName The name of the test group 
+ * @param {object[]} aTests A list of objects with the following members
+ *  <br />{function} test The test function (will be passed the test
+ *  object)
+ *  <br />{integer} time The time limit for the test before it times out
+ *  in milliseconds
+ * @param {function} aCallback Will be called when the test suite is done running.
  */
-TREADMILL.createTestSuite = function createTestSuite(name, tests) {
+TREADMILL.createAndRunTestSuite = function createTestSuite(aName, aTests, aCallback) {
   var simpletest = require("simpletest/testrunner_1"),
       suite, i;
   suite = new simpletest.TestSuite(
       "Simpletest", TREADMILL.testOutputFormatter(TREADMILL.appendOutput));
-  for(i = 0; i < tests.length; i += 1) {
-    tests[i].time = tests[i].time || 500;
-    suite.addTest(name, tests[i].test, tests[i].test.name, null, tests[i].time);
+  for(i = 0; i < aTests.length; i += 1) {
+    aTests[i].time = aTests[i].time || 500;
+    suite.addTest(aName, aTests[i].test, aTests[i].test.name, null, aTests[i].time);
   }
-  return suite;
+  suite.run(aCallback);
 };
