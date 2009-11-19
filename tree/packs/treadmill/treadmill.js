@@ -1,14 +1,16 @@
 /**
- * @fileOverview <p>treadmill/treadmill.js provides the hooks to easily run JSLint
+ * @fileOverview <p>treadmill/treadmill.js provides a few hooks to easily run JSLint
  * <a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
- * and Simpletest test suites on a toolpack.
+ * and Simpletest on your toolpack.
  * </p><p>
+ * To get started building a test suite, you simply create an html document within
+ * your toolpack that will run your tests.
  * <code>treadmill/treadmill.js</code> should be included in your testrunner
  * html document with <code>&lt;script
  * src="../treadmill/treadmill.js"...&gt;</code> or <code>&lt;script
  * src="chrome://kixx/content/packs/treadmill/treadmill.js"...&gt;</code>
  * </p><p>
- * Your testrunner html document must have a container (&lt;div&gt;) with the id
+ * Your test runner html document must have a container (&lt;div&gt;) with the id
  * attribute "treadmill" where the results of the JSLint scans and Simpletest
  * output will be displayed.
  * </p><p>
