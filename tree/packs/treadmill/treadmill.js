@@ -1,22 +1,35 @@
 /**
- * @fileOverview <p>treadmill/treadmill.js provides a few hooks to easily run JSLint
+ * @fileOverview
+ * <p>
+ * The file
+ * <code>treadmill/treadmill.js</code>
+ * provides a few hooks to easily run JSLint
  * <a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
  * and Simpletest on your toolpack.
  * </p><p>
- * To get started building a test suite, you simply create an html document within
- * your toolpack that will run your tests.
- * <code>treadmill/treadmill.js</code> should be included in your testrunner
- * html document with <code>&lt;script
- * src="../treadmill/treadmill.js"...&gt;</code> or <code>&lt;script
+ * To build an interactive test suite simply create an html document within
+ * your toolpack that will run your tests.  The file
+ * <code>treadmill/treadmill.js</code>
+ * should be included in your testrunner html document with
+ * <br /><code>&lt;script src="../treadmill/treadmill.js"...&gt;</code><br />
+ * or
+ * <br /><code>&lt;script
  * src="chrome://kixx/content/packs/treadmill/treadmill.js"...&gt;</code>
  * </p><p>
- * Your test runner html document must have a container (&lt;div&gt;) with the id
- * attribute "treadmill" where the results of the JSLint scans and Simpletest
- * output will be displayed.
+ * Your test runner html document must have a container
+ * (<code>&lt;div&gt;</code>)
+ * with the id attribute set to
+ * <code>id="treadmill"</code>
+ * where the results of the JSLint scans and Simpletest output will be
+ * displayed.
  * </p><p>
- * Important!: <code>treadmill.js</code> injects the <code>require()</code>
+ * <b>Important!:
+ * <code>treadmill.js</code>
+ * injects the
+ * <code>require()</code>
  * function into the global namespace of the testrunner html document, enabling
  * use of the JavaScript module system within Kixx.
+ * </b>
  */
 
 /*jslint
@@ -44,8 +57,8 @@ var require = (function getRequire() {
 }());
 
 /**
- * @namespace The Treadmill application namespace which will be added to the
- * global namespace.
+ * @namespace TREADMILL will be added to the global namespace.
+ * @description The Treadmill application namespace.
  */
 var TREADMILL = {};
 
@@ -76,7 +89,14 @@ TREADMILL.appendOutput = (function createAppendOutput() {
   return that;
 }());
 
-/** @private */
+/**
+ * @field
+ * @description The standard Treadmill output formatter.
+ * Outputs Simpletest results to the test document.
+ * @example
+ * var TestSuite = require("simpletest/testrunner_1").TestSuite;
+ * var suite = new TestSuite("My Tests", TREADMILL.testOutputFormatter);
+ */
 TREADMILL.testOutputFormatter =
 function createTestOutputFormatter(stdout) {
   // public methods
@@ -168,11 +188,14 @@ function createTestOutputFormatter(stdout) {
 };
 
 /**
- * Scan a JavaScript file with JSLint
+ * Scan a JavaScript file with JSLint.
  * <a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
  * Will output the results as an html snippet onto your testrunner page.
  * Important!: To use this feature, you need to include
- * <code>&lt;script src="chrome://kixx/content/packs/jslint/fulljslint.js"&gt;&lt;/script&lt;</code>
+ * <code>
+ * &lt;script src="chrome://kixx/content/packs/jslint/fulljslint.js"
+ * &gt;&lt;/script&gt;
+ * </code>
  *
  * @param {string} aFile The location of the file using the same annotation
  * as <code>require()</code>.
@@ -193,11 +216,13 @@ TREADMILL.jslint = function jslint(aFile) {
 
 /**
  * Create a Simpletest test suite and run it. The output from the tests will be
- * written to the container element with id "treadmill" when the suite id done
- * running.
+ * written to the container element with id "treadmill" when the suite is done
+ * running. This is just a convenience wrapper for the
+ * <code>require("simpletest/testrunner_1").TestSuite</code>
+ * constructor.
  *
  * @param {string} aName The name of the test group 
- * @param {object[]} aTests A list of objects with the following members
+ * @param {object[]} aTests A list of objects with the following members:
  *  <br />{function} test The test function (will be passed the test
  *  object)
  *  <br />{integer} time The time limit for the test before it times out

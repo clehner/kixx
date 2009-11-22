@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
-
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
@@ -15,9 +14,8 @@
 
     body {
       margin: 2em;
-      font: 16px sans-serif;
-      color: #bbb;
-      background: #000;
+      font: 16px/1.5em sans-serif;
+      color: #333;
     }
 
     a {
@@ -30,15 +28,18 @@
 
     #header {
       font-family: sans-serif;
-      margin: 1em 17% 1em 12%;
+      margin: 1em 0 1em 0;
+      text-align: center;
     }
 
     #header > h1 {
       font-size: 3em;
+      margin-bottom: 0.5em;
     }
 
     #header > h2 {
       font-size: 1.5em;
+      margin-bottom: 2em;
     }
 
     .contenthead {
@@ -47,25 +48,28 @@
     }
 
     #content {
-      margin: 1em 17% 1em 12%;
+      margin: 1em 23% 1em 19%;
     }
 
     #content > p {
       margin-bottom: 1em;
     }
 
-    h1.classTitle {
-      font-size: 1em;
+    code {
+      background: #ddd;
+      padding: 0.1em;
+    }
+
+    div.sectionTitle {
+      font-size: 1.3em;
       background: #333;
       color: #ddd;
       padding: 0.5em;
+      margin: 2em 0 1em 0;
     }
 
     div.fixedFont {
-      margin: 3em 0 0 0;
-      background: #333;
-      color: #ddd;
-      padding: 0.5em;
+      font: 1.1em fixed;
     }
 
     .description {
@@ -90,70 +94,123 @@
       color: #777;
     }
   </style>
-
 </head>
-
 <body>
 <div id="header">
   <h1 id="title">Kixx Treadmill</h1>
   <h2 id="sub-title">Give your toolpack a workout with automated code testing.</h2>
 </div>
 <div id="content">
-  <p>
-  Treadmill is a JavaScript file that you can include into an html document to
-  create an automated JavaScript test suite and JavaScript code quality tool
-  for your toolpacks. By including <code>treadmill/treadmill.js</code> in an
-  html document you make that document into a "testrunner" application that can
-  be loaded into the browser to run your tests.
-  </p><p>
-  Treadmill currently supports Simpletest as its testing framework and also includes
-  <a href="http://jslint.com" target="_blank">JSLint</a>,
-  which is an awesome JavaScript code quality tool. Simpletest is automatically imported
-  for you when you make the <code>TREADMILL.createTestSuite()</code> function call
-  but to use JSLint you'll need to include the JSLint file in your testrunner html
-  document:
-  <code>&lt;script src="chrome://kixx/content/packs/jslint/fulljslint.js"&gt;&lt;/script&gt;</code>
-  </p><p>
-  To see an example of a testrunner html document check out the source to
-  <a href="chrome://kixx/content/packs/treadmill/test/test_treadmill.html">
-    packs/treadmill/test/test_treadmill.html
-  </a>.
-  </p>
-  <p>treadmill/treadmill.js provides the hooks to easily run JSLint
-  <a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
-  and Simpletest test suites on a toolpack.
-  </p><p>
-  <code>treadmill/treadmill.js</code> should be included in your testrunner
-  html document with <code>&lt;script
-  src="../treadmill/treadmill.js"...&gt;</code> or <code>&lt;script
-  src="chrome://kixx/content/packs/treadmill/treadmill.js"...&gt;</code>
-  </p><p>
-  Your testrunner html document must have a container (&lt;div&gt;) with the id
-  attribute "treadmill" where the results of the JSLint scans and Simpletest
-  output will be displayed.
-  </p><p>
-  Important!: <code>treadmill.js</code> injects the <code>require()</code>
-  function into the global namespace of the testrunner html document, enabling
-  use of the JavaScript module system within Kixx.
-  </p>
+    <p>
+    The file
+    <code>treadmill/treadmill.js</code>
+    provides a few hooks to easily run JSLint
+    <a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
+    and Simpletest on your toolpack.
+    </p><p>
+    To build an interactive test suite simply create an html document within
+    your toolpack that will run your tests.  The file
+    <code>treadmill/treadmill.js</code>
+    should be included in your testrunner html document with
+    <br /><code>&lt;script src="../treadmill/treadmill.js"...&gt;</code><br />
+    or
+    <br /><code>&lt;script
+    src="chrome://kixx/content/packs/treadmill/treadmill.js"...&gt;</code>
+    </p><p>
+    Your test runner html document must have a container
+    (<code>&lt;div&gt;</code>)
+    with the id attribute set to
+    <code>id="treadmill"</code>
+    where the results of the JSLint scans and Simpletest output will be
+    displayed.
+    </p><p>
+    <b>Important!:
+    <code>treadmill.js</code>
+    injects the
+    <code>require()</code>
+    function into the global namespace of the testrunner html document, enabling
+    use of the JavaScript module system within Kixx.
+    </b>
+    </p>
   <hr />
 
   <h3 class="contenthead">Source Documentation</h3>
+  <a href="treadmill_js_src.html">see the source</a>
 
-      <h1 class="classTitle">
-              Namespace TREADMILL
-      </h1>
-			<p class="description">
+
+<!-- ============================== constructor details ==================== -->		
+			
+			<div class="details"><a name="constructor"> </a>
+				<div class="sectionTitle">
+					Namespace Detail
+				</div>
 				
+				<div class="fixedFont">
+						<b>TREADMILL</b>
+				</div>
+				
+				<div class="description">
+					The Treadmill application namespace.
+					
+				</div>
+				
+				
+				
+				
+					
+					
+					
+					
+					
+					
+					
+
+			</div>
+			
+
+<!-- ============================== field details ========================== -->		
+			
+				<div class="sectionTitle">
+					Field Detail
+				</div>
+				
+					<a name=".testOutputFormatter"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">TREADMILL.</span><b>testOutputFormatter</b>
+					
+					</div>
+					<div class="description">
+						The standard Treadmill output formatter.
+Outputs Simpletest results to the test document.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">var TestSuite = require("simpletest/testrunner_1").TestSuite;
+var suite = new TestSuite("My Tests", TREADMILL.testOutputFormatter);</pre>
+					
+					
+
+						
+						
+						
+						
+
+					
 				
 			
-				The Treadmill application namespace which will be added to the
-global namespace.
+
+<!-- ============================== method details ========================= -->		
+			
+				<div class="sectionTitle">
+					Method Detail
+				</div>
 				
-				
-					<br /><i>Defined in: </i>treadmill.js.
-				
-			</p>
+					<a name=".createAndRunTestSuite"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
@@ -162,8 +219,10 @@ global namespace.
 					</div>
 					<div class="description">
 						Create a Simpletest test suite and run it. The output from the tests will be
-written to the container element with id "treadmill" when the suite id done
-running.
+written to the container element with id "treadmill" when the suite is done
+running. This is just a convenience wrapper for the
+<code>require("simpletest/testrunner_1").TestSuite</code>
+constructor.
 						
 						
 					</div>
@@ -184,7 +243,7 @@ running.
 									<span class="light fixedFont">{object[]}</span> <b>aTests</b>
 									
 								</dt>
-								<dd>A list of objects with the following members
+								<dd>A list of objects with the following members:
  <br />{function} test The test function (will be passed the test
  object)
  <br />{integer} time The time limit for the test before it times out
@@ -200,7 +259,13 @@ running.
 						
 						
 						
+						
+						
+						
+						
 
+					<hr />
+				
 					<a name=".jslint"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -209,11 +274,14 @@ running.
 					
 					</div>
 					<div class="description">
-						Scan a JavaScript file with JSLint
+						Scan a JavaScript file with JSLint.
 <a href="http://jslint.com/" target="_blank">(JSLint.com)</a>
 Will output the results as an html snippet onto your testrunner page.
 Important!: To use this feature, you need to include
-<code>&lt;script src="chrome://kixx/content/packs/jslint/fulljslint.js"&gt;&lt;/script&lt;</code>
+<code>
+&lt;script src="chrome://kixx/content/packs/jslint/fulljslint.js"
+&gt;&lt;/script&gt;
+</code>
 						
 						
 					</div>
@@ -232,17 +300,6 @@ Important!: To use this feature, you need to include
 as <code>require()</code>.</dd>
 							
 							</dl>
-						
-						
-						
-						
-						
-						
-						
-
-					
-				
-			
 </div>
 </body>
 </html>
