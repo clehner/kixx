@@ -1,3 +1,7 @@
+/**
+ * This module is broken and currently not in use.
+ */
+
 var gFile = require("services/os_1").file;
 var settings = require("services/settings_1");
 

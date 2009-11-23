@@ -5,6 +5,10 @@ body {
   font-size: 16px;
 }
 
+a img {
+  border: none;
+}
+
 #content {
   float: right;
   width: 50%;
@@ -43,10 +47,11 @@ body {
   background: #222;
   width: 37%;
   height: 400px;
-  padding: 1% 2% 2% 1%;
+  padding: 2% 2% 2% 1%;
 }
 
 .launcher-icon {
-  margin: 1em 0 0 1em;
-  cursor: pointer;
+  float: left;
+  display: block;
+  margin-left: 1.5em;
 }

@@ -1,306 +1,205 @@
-// todo: use a central error handing module
+/**
+ * @fileOverview Bootsrap Kixx BACKSTAGE
+ */
+
+/*jslint
+onevar: true,
+evil: true,
+undef: true,
+nomen: true,
+eqeqeq: true,
+plusplus: true,
+bitwise: true,
+strict: true,
+immed: true
+*/
+
+/*global
+Components: false,
+XMLHttpRequest: false
+*/
+
+"use strict";
 
 // assign backstage to window for syntatic sugar
-var backstage = window;
-var cache = {};
-var modules = {};
+var BACKSTAGE = (function startBackstage() {
+  var pub = {}, // the public api for BACKSTAGE
 
-(function whatPlatform(Backstage)
-{
-  // todo: the platform object needs to dynamically detect what platform
-  // we are actually running on
-  // todo: FUEL only works for Firefox
-  // https://developer.mozilla.org/en/FUEL/Application#See_also
-  Backstage.platform = Components.classes["@mozilla.org/fuel/application;1"]
-    .getService(Components.interfaces.fuelIApplication);
-}
-)
-(backstage);
+      moduleCache = {}, // the private module cache
 
-function burning()
-{
-  return false;
-}
+      // todo: the platform object needs to dynamically detect what platform
+      // we are actually running on
+      // todo: FUEL only works for Firefox
+      // https://developer.mozilla.org/en/FUEL/Application#See_also
+      platform = Components.classes["@mozilla.org/fuel/application;1"].
+                     getService(Components.interfaces.fuelIApplication),
 
-function ignition()
-{
-  return false;
-}
-
-(function(Backstage)
-{
-  var CACHE = {};
-
-  Backstage.cache.getOrCreateNamespace =
-  function cache_getOrCreateNamespace(aNamespace)
-  {
-    if(CACHE[aNamespace]) return CACHE[aNamespace];
-    CACHE[aNamespace] = {};
-    return CACHE[aNamespace];
-  }
-
-  Backstage.cache.clearNamespace =
-  function cache_clearNamespace(aNamespace)
-  {
-    delete CACHE[aNamespace];
-  }
-
-  Backstage.cache.clear =
-  function cache_clear()
-  {
-    CACHE = {};
-  }
-})
-(backstage);
-
-(function (Backstage)
-{
-  var CACHE = Backstage.cache.getOrCreateNamespace("KIXX_MODULE_CACHE");
-
-  // todo: should sys.window be included in the sys/system object???
-  function System()
-  {
-    var system = {};
-    system.print = function system_print(msg, label)
-    {
+      system = {};
+      
+  // the system object only has one method
+  system.print = function (msg, label) {
       label = label || "log";
-      Backstage.platform.console.log(label +": "+ msg +"\n");
-    };
-    return system;
-  }
+      msg = ((typeof msg === "undefined") ? "undefined" : msg +"");
+      platform.console.log(label +": "+ msg +"\n");
+  };
 
-  function Require(MAIN, PATH, ID)
-  {
-    var loader = Loader(PATH);
-    function require(id)
-    {
-      var modID = loader.resolve(id);
+  // loader constructor
+  function loader(thisPath) {
+    var that = {}; // the public loader api
 
-      // if this module has already been loaded, just return it.
-      if(CACHE[modID]) return CACHE[modID];
+    function fetch(aURI) {
+      var req = new XMLHttpRequest();
 
-      var terms = modID.split("/");
-      terms.pop();
-      var newPath = terms.join("/");
+      // we do this because we don't want XHR to try to create a DOM
+      req.overrideMimeType("text/plain");
 
-      // MAIN is the module that started this thread, and the name that
-      // will travel with it throughout it's life
-      MAIN = MAIN || modID;
-
-      CACHE[modID] = {}; // this object will become the module
-      var exports = CACHE[modID];
-      var factory = loader.load(id);
-      // todo: we need nested try / catch here to catch weird eval errors
-      // todo: the second System() parameter is there for backward compatability
-      // with modules that use "system" instead of "sys" (Chiron), and should
-      // eventually be removed
-      factory(Require(MAIN, newPath, modID), exports, System(), System());
-
-      return exports;
+      req.open("GET", aURI, false);
+      // todo: use a timer so this does not block
+      // for too long without raising an exception
+      req.send(null);
+      return req.responseText;
     }
 
-    require.id = ID;
-    require.main = MAIN;
-    require.loader = loader;
-
-    return require;
-  }
-
-  function Loader(path)
-  {
-    var loader = {};
-
-    loader.load = function load(id) {
-      var uri = loader.normalize(loader.resolve(id));
-      // todo: we need a try / catch here to catch syntax errors
-      return loader.evaluate(loader.fetch(uri), uri);
-    };
-
-    loader.fetch = function fetch(uri)
-    {
-      var req = null;
-
-      // todo: can we do this in Chromium and Mozilla???
-      req = new XMLHttpRequest();
-
-      req.overrideMimeType("text/plain");
-      req.open("GET", uri, false);
-      try {
-        // todo: use a timer so this does not block startup of the browser
-        // for too long
-        req.send(null);
-      } catch(e) {
-        // todo: only handle the "not found" error
-        // todo: system error handling should get logged errors
-        throw new Error("require(): could not locate file at "+ uri);
-      }
-      return req.responseText;
-    };
-
-    loader.evaluate = function evaluate(text, uri)
-    {
-      // todo: the second System() parameter is there for backward compatability
-      // with modules that use "system" instead of "sys" (Chiron), and should
-      // eventually be removed
-      text = (
-          "(function (require, exports, sys, system) {" +
-              text +
-          "})");
+    function evaluate(aText, aURI) {
+      var mod; // the module we will load
 
       try {
-        return Backstage.eval(text);
+        mod = eval(("(function (require, exports, sys, system) {" +
+              aText +"})"));
+        // todo: the second System() parameter is there for backward
+        // compatability with modules that use "system" instead of "sys"
+        // (Chiron), and should eventually be removed
       } catch (exception) {
-      // todo: In eval(), the line numbers and file name get all foobarred when
-      // an error occurs and all this mess doesn't do anything
-        if (exception && !exception.message)
+        // todo: In eval(), the line numbers and file name get all foobarred
+        // when an error occurs and all this mess doesn't do anything
+        if (exception && !exception.message) {
           exception.message = 'Error';
+        }
         try {
           try {
             eval("throw new Error()");
           } catch (deliberate) {
-            if (deliberate.lineNumber !== undefined) {
+            if (typeof deliberate.lineNumber !== "undefined") {
               exception.message += ' at '+
                 (exception.lineNumber - deliberate.lineNumber + 1);
             }
           }
-          exception.message += ' in ' + uri;
+          exception.message += ' in ' + aURI;
         } catch (ignore) {
         }
         throw exception;
       }
-    };
+      return mod;
+    }
 
-    loader.resolve = function resolve(id)
-    {
-      // todo: parameter checks for sanity
-      //  -- test for invalid first characters like "/"
-      if(id.charAt(0) != ".")
-        return id +".js";
+    function resolve(aID) {
+      var terms, first, parts;
 
-      var terms = id.split("/");
-      var first = terms.shift();
+      if(typeof aID !== "string") {
+        throw new Error("Single parameter passed to require.loader.resolve() "+
+            "is expected to be a string, not "+ typeof aID);
+      }
 
-      if(first == ".")
-        return (path +"/"+ terms.join("/") +".js");
+      if(!/[\w\.]/.test(aID[0])) {
+        throw new Error("Single parameter passed to require.loader.resolve() "+
+            "must start with a-z, A-Z, 0-9, _, or ., not '"+ aID[0] +"'");
+      }
 
-      if(first !== "..")
-        throw new Error("require(): Invalid module id path'"+ id +"'");
+      if(aID[0] !== ".") {
+        // path from the root module dir
+        return aID +".js";
+      }
 
-      var parts = path.split("/");
-      parts.pop();
+      terms = aID.split("/");
+      first = terms.shift();
+
+      if(first === ".") {
+        // path from the current dir
+        return (thisPath +"/"+ terms.join("/") +".js");
+      }
+
+      if(first !== "..") {
+        // at this point we are expecting the first token to be ".."
+        throw new Error("require(): Invalid module id path'"+ aID +"'");
+      }
+
+      parts = thisPath.split("/");
+      parts.pop(); // moves us back one dir
 
       return (parts.join("/") +"/"+ terms.join("/") +".js");
     }
 
-    loader.normalize = function normalize(resolved)
-    {
+    function normalize(aResolved) {
       // todo: base require url needs to be set in sys configs
       // according to the platform we're on
       var base = "resource://kixx/packs/";
 
-      return base + resolved;
+      return base + aResolved;
     }
 
+    function load(aID) {
+      var uri = normalize(resolve(aID));
+      // todo: we need a try / catch here to catch syntax errors
+      return evaluate(fetch(uri), uri);
+    }
 
-    return loader;
+    that.fetch = fetch;
+    that.evaluate = evaluate;
+    that.resolve = resolve;
+    that.normalize = normalize;
+    that.load = load;
+    return that;
   }
 
-  // getLoader() is injected to backstage.modules.getLoader().
-  // It simply returns the module loader (require())
-  Backstage.modules.getLoader =
-  function modules_getLoader() {
-    return Require("","","");
-  }
-})
-(backstage);
+  function getModuleLoader(thisMain, thisPath, thisID) {
+    // By making the loader private before copying it over to require.loader we
+    // prevent any modifications made by the caller to affect its use within
+    // the require() function.
+    var thisLoader = loader(thisPath);
 
-backstage.require = backstage.modules.getLoader();
-backstage.log = require("services/log_1");
+    function that(aID) {
+      var modID,
+          terms,
+          newPath,
+          main,
+          exports,
+          factory;
 
-// check to see if the system is already started by calling burning() and if
-// not, start the kixx system by importing utility modules and then loading the
-// init module for each package 
-function start()
-{
-  // start cannot be called if the system has already been started
-  if(backstage.burning()) {
-    backstage.log.warn("backstage.start() cannot be called if the system "+
-        "has already been started.");
-    return;
-  }
+      modID = thisLoader.resolve(aID);
 
-  // prevent multiple calls to start while the system is starting
-  if(backstage.ignition()) {
-    backstage.log.warn("backstage.start() cannot be called "+
-        "twice in one session.");
-    return;
-  }
+      // if this module has already been loaded, just return it.
+      if(moduleCache[modID]) {
+        return moduleCache[modID];
+      }
 
-  backstage.log.info("backstage.start() ignition.");
+      terms = modID.split("/");
+      terms.pop();
+      newPath = terms.join("/");
 
-  backstage.ignition = function backstage_ignition()
-  {
-    return true;
-  }
+      // MAIN is the module that started this thread, and the name that
+      // will travel with it throughout it's life
+      main = thisMain || modID;
 
-  var CHROME_LOADED = false;
-  // todo: On the Mozilla platform, this backstage window is not loaded until the "load" event
-  // for the main browser window is fired.  What happens with Chromium???
-  CHROME_LOADED = true;
-  var BACKGROUND_LOADED = false;
-  var PACKMGR_INIT = false;
+      moduleCache[modID] = {}; // this object will become the module
+      exports = moduleCache[modID];
+      factory = thisLoader.load(aID);
 
-  var pkg = require("platform/pkgmgr_1");
+      // todo: we need nested try / catch here to catch weird eval errors
+      factory(that(main, newPath, modID), exports, system, system);
+      // todo: the second System() parameter is there for backward compatability
+      // with modules that use "system" instead of "sys" (Chiron), and should
+      // eventually be removed
 
-  function IGNITE()
-  {
-    var packs = pkg.getUnpackedList();
-    // todo: background object should handle cases where packages
-    // do not have an init module 
-    backstage.log.info("backstage.start(): initializing packs.");
-    for(var name in packs)
-      require(name +"/init");
+      return exports;
+    }
 
-    backstage.burning = function backstage_burning()
-    {
-      return true;
-    };
-    backstage.log.info("backstage.start(): burning.");
+    that.id = thisID;
+    that.main = thisMain;
+    that.loader = thisLoader;
+
+    return that;
   }
 
-  window.addEventListener("load", function handleBackstageLoad(e)
-      {
-        backstage.log.info("backstage.start(): background loaded.");
-        BACKGROUND_LOADED = true;
-        if(CHROME_LOADED && PACKMGR_INIT && BACKGROUND_LOADED) IGNITE();
-      },
-      false);
-
-  pkg.init(function pkgmgr_init_callback()
-      {
-        backstage.log.info("backstage.start(): package manager is lit.");
-        PACKMGR_INIT = true;
-        if(CHROME_LOADED && PACKMGR_INIT && BACKGROUND_LOADED) IGNITE();
-      });
-}
-
-// clear the cache
-// todo: teardown() should be a stub if we are on the Chromium platform
-// since it provides its own restart functionality
-function teardown()
-{
-  // todo: teardown must close or reload all windows and tabs using require()
-  // to get a true restart and prevent leaks
-}
-
-// todo: restart() should be a stub if we are on the Chromium platform
-// since it provides its own restart functionality
-function restart()
-{
-  teardown();
-  var iframe = parent.document.getElementById("backstage");
-  iframe.contentWindow.location.reload(true);
-}
-
-// fire it up
-backstage.start();
+  pub.platform = platform;
+  pub.require = getModuleLoader("", "", "");
+}());
