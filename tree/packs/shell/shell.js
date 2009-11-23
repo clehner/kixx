@@ -1,4 +1,4 @@
-var console = require("platform/utils_1").console;
+var console = null;
 
 /**
  */
@@ -146,6 +146,7 @@ Utils.setTextareaRows = function Utils_setTextareaRows(textarea, input)
 
 function onWinLoad(e)
 {
+  console = require("platform/utils_1").console;
   // todo: this functionality should be moved into a firefox specific module.
   // the memcache module should remain platform agnostic
   var shell = Components.classes["@mozilla.org/appshell/appShellService;1"]
@@ -157,4 +158,4 @@ function onWinLoad(e)
   CmdLine.init();
 }
 
-window.addEventListener("load", onWinLoad, false);
+window.addEventListener("moduleLoaderReady", onWinLoad, false);

@@ -1,4 +1,4 @@
-function onWindowLoad(e)
+function onModuleLoaderReady(e)
 {
   var scr = document.createElement("script");
   document.getElementById("document-head").appendChild(scr);
@@ -35,4 +35,4 @@ function createIcon(img, handler)
   return el;
 }
 
-window.addEventListener("load", onWindowLoad, false);
+window.addEventListener("moduleLoaderReady", onModuleLoaderReady, false);
