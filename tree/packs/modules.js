@@ -10,6 +10,7 @@
 })(this)
 
 // the the module loading tool into this script
+/*
 var require = (function getRequire() {
   // todo: this functionality should be moved into a firefox specific module.
   return Components.classes["@mozilla.org/appshell/appShellService;1"].
@@ -17,3 +18,4 @@ var require = (function getRequire() {
       hiddenDOMWindow.document.documentElement.
       ownerDocument.getElementById("backstage").contentWindow.modules.getLoader();
 }());
+*/
