@@ -47,15 +47,15 @@ function sendout(aLevel, aLevelDesc, aMessage)
 {
   var msg = formatMessage(aLevelDesc, aMessage);
   if(aLevel < 60) {
-    console.log(msg);
+    require("platform/utils_1").console.log(msg);
   }
   else
-    console.err(msg);
+    require("platform/utils_1").console.err(msg);
 
   // todo: rotate log files
   if(LOG_TO_FILE)
   {
-    var logfile = file.open("Profile");
+    var logfile = require("platform/utils_1").file.open("Profile");
     logfile.append(FILE);
     file.write(logfile, msg +"\n", true);
   }
@@ -91,6 +91,3 @@ function formatError(aE)
              "------------------------------\n";
   return rv;
 }
-
-var console = require("platform/utils_1").console;
-var file = require("platform/utils_1").file;

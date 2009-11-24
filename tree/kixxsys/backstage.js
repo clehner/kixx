@@ -43,6 +43,16 @@ var BACKSTAGE = (function startBackstage() {
       platform.console.log(label +": "+ msg +"\n");
   };
 
+  // constructor for synthetic module errors, 
+  // since the real errors do not contain the line number or file name
+  function moduleError(aFilename, aMsg, aLine, aThisLine) {
+    var newEx = new Error(aMsg);
+    newEx.fileName = aFilename;
+    newEx.lineNumber = aLine - (aThisLine - 136);
+    newEx.constructor = moduleError;
+    return newEx;
+  }
+
   // loader constructor
   function loader(thisPath) {
     var that = {}; // the public loader api
@@ -54,9 +64,15 @@ var BACKSTAGE = (function startBackstage() {
       req.overrideMimeType("text/plain");
 
       req.open("GET", aURI, false);
+
       // todo: use a timer so this does not block
       // for too long without raising an exception
-      req.send(null);
+      try {
+        req.send(null);
+      } catch(e) {
+        // this is better than the native error
+        throw new Error("Could not load module at "+ aURI);
+      }
       return req.responseText;
     }
 
@@ -95,17 +111,22 @@ var BACKSTAGE = (function startBackstage() {
     function resolve(aID) {
       var terms, first, parts;
 
-      if(typeof aID !== "string") {
+      if (typeof aID !== "string") {
         throw new Error("Single parameter passed to require.loader.resolve() "+
             "is expected to be a string, not "+ typeof aID);
       }
 
-      if(!/[\w\.]/.test(aID[0])) {
+      if (!/[\w\.]/.test(aID[0])) {
         throw new Error("Single parameter passed to require.loader.resolve() "+
             "must start with a-z, A-Z, 0-9, _, or ., not '"+ aID[0] +"'");
       }
 
-      if(aID[0] !== ".") {
+      if (aID.slice(0, -3) === ".js") {
+        throw new Error("Single parameter passed to require.loader.resolve() "+
+            "must not end in '.js' ("+ aID +")");
+      }
+
+      if (aID[0] !== ".") {
         // path from the root module dir
         return aID +".js";
       }
@@ -113,12 +134,12 @@ var BACKSTAGE = (function startBackstage() {
       terms = aID.split("/");
       first = terms.shift();
 
-      if(first === ".") {
+      if (first === ".") {
         // path from the current dir
         return (thisPath +"/"+ terms.join("/") +".js");
       }
 
-      if(first !== "..") {
+      if (first !== "..") {
         // at this point we are expecting the first token to be ".."
         throw new Error("require(): Invalid module id path'"+ aID +"'");
       }
@@ -158,12 +179,14 @@ var BACKSTAGE = (function startBackstage() {
     var thisLoader = loader(thisPath);
 
     function that(aID) {
-      var modID,
+      var modID, // the id of the module
+          newPath, // the current path we are now on
+          main, // the module that started this thread
+          exports, // the exports object that will become the module
+          factory, // the module factory function
+
           terms,
-          newPath,
-          main,
-          exports,
-          factory;
+          deliberateEx;
 
       modID = thisLoader.resolve(aID);
 
@@ -185,7 +208,19 @@ var BACKSTAGE = (function startBackstage() {
       factory = thisLoader.load(aID);
 
       // todo: we need nested try / catch here to catch weird eval errors
-      factory(that(main, newPath, modID), exports, system, system);
+      try {
+        factory(getModuleLoader(main, newPath, modID), exports, system, system);
+      } catch(ex) {
+        if (ex.constructor === moduleError) {
+          throw ex;
+        }
+        try {
+          throw new Error("deliberate");
+        } catch(deliberateEx) {
+          throw moduleError(modID, ex.message, ex.lineNumber,
+              deliberateEx.lineNumber);
+        }
+      }
       // todo: the second System() parameter is there for backward compatability
       // with modules that use "system" instead of "sys" (Chiron), and should
       // eventually be removed
@@ -202,4 +237,13 @@ var BACKSTAGE = (function startBackstage() {
 
   pub.platform = platform;
   pub.require = getModuleLoader("", "", "");
+  return pub;
+}());
+
+// let listeners know that we are ready
+(function init() {
+  BACKSTAGE.require("platform/init");
+  var ev = document.createEvent("Event");
+  ev.initEvent("moduleLoaderReady", true, false);
+  window.dispatchEvent(ev);
 }());

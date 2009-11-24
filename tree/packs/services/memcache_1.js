@@ -9,7 +9,7 @@ var shell = Components.classes["@mozilla.org/appshell/appShellService;1"]
 var parentElement = shell.hiddenDOMWindow.document.documentElement;
 var iframe = parentElement.ownerDocument.getElementById("backstage");
 var backstage = iframe.contentWindow;
-var TABLE = backstage.cache.getOrCreateNamespace("GLOBAL_MEMCACHE_API");
+var TABLE = {};
 
 /**
  * Sets a key's value, regardless of previous contents in cache.
