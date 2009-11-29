@@ -182,7 +182,7 @@ var MLT = (function () {
     }());
 
     (function () {
-     var loader, listing, compliance;
+     var loader, listing, compliance, security;
 
      loader = BACKSTAGE.getModuleLoader("resource://kixx/packs/platform/interoperablejs/trivial/");
      loader("program");
@@ -191,6 +191,7 @@ var MLT = (function () {
      listing.append("packs");
      listing.append("platform");
      listing.append("interoperablejs");
+
      compliance = listing.clone();
      compliance.append("compliance");
      fileUtils.contents(compliance).forEach(
@@ -200,6 +201,19 @@ var MLT = (function () {
          }
          BACKSTAGE.getModuleLoader(
            "resource://kixx/packs/platform/interoperablejs/compliance/"+
+           item.leafName +"/")("program");
+       });
+
+     security = listing.clone();
+     security.append("security");
+     fileUtils.contents(security).forEach(
+       function (item) {
+         // we don't run the sandbox tests
+         if (item.leafName === "sandbox") {
+           return;
+         }
+         BACKSTAGE.getModuleLoader(
+           "resource://kixx/packs/platform/interoperablejs/security/"+
            item.leafName +"/")("program");
        });
     }());
