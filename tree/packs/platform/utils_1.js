@@ -1,6 +1,6 @@
 // todo: sniff out the platform application and load the corresponding utils
 // package
-var platform = require("./firefox/utils_1");
+var platform = require("platform/firefox/utils_1");
 
 exports.getCurrentWindow = platform.getCurrentWindow;
 exports.installToolbarButton = platform.installToolbarButton;

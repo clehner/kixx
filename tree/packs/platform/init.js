@@ -12,6 +12,6 @@ function main() {
   require("services/log_1").info("Kixx platform loaded.");
 }
 
-if (require.main === require.id) {
+if (require.main === module.id) {
   main();
 }

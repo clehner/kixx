@@ -48,24 +48,27 @@ immed: true
 "use strict";
 
 /**
- * <p>This script tries to intelligently insert the require() object into the
- * global namespace.  The require() object lives on the background page and is
+ * <p>This script tries to intelligently insert the BACKSTAGE object into the
+ * global namespace.  The BACKSTAGE object lives on the background page and is
  * not immediately available when the browser starts up. Normally this is not a
  * problem except in the case where the user has set the browser to open with a
- * page that depends on the availability of the require() object.
+ * page that depends on the availability of the BACKSTAGE object.
  * </p><p>
- * Therefore, this script first defines a require() function that throws an
- * error when called.  When the window loads (implying that the background page
- * has loaded as well), then the require() object is redefined and a special
- * event is fired on the window called "moduleLoaderReady".  Content pages can
- * be notified that the require() object is ready for use by listening to the
- * "moduleLoaderReady" DOM event to be fired on the window.
+ * Therefore, this script first defines a BACKSTAGE.getModuleLoader() function
+ * that throws an error when called.  When the Kixx platform and the current
+ * window are both loaded the BACKSTAGE.getModuleLoader() function is redefined
+ * and a special event is fired on the window called "moduleLoaderReady".
+ * Content pages can be notified that the BACKSTAGE object is ready for use by
+ * listening to the "moduleLoaderReady" DOM event to be fired on the window.
  * </p>
  */
-var require = function tempRequire(arg) {
-  throw new Error("The require() object is not yet available. "+
-      "(called by "+ arguments.callee.caller.name +"() for "+ arg +")");
+var BACKSTAGE = {
+  getModuleLoader: function tempLoader(arg) {
+    throw new Error("The BACKSTAGE object is not yet available. "+
+        "(called by "+ arguments.callee.caller.name +"() for "+ arg +")");
+  }
 };
+
 
 (function () {
   var loaderReady = false,
@@ -77,8 +80,8 @@ var require = function tempRequire(arg) {
                   contentWindow;
 
   function checkAndLoad() {
-    if ((loaderReady || bg.BACKSTAGE) && thisLoaded) {
-      require = bg.BACKSTAGE.require;
+    if ((loaderReady || bg.BACKSTAGE.getModuleLoader) && thisLoaded) {
+      BACKSTAGE = bg.BACKSTAGE;
       var ev = document.createEvent("Event");
       ev.initEvent("moduleLoaderReady", true, false);
       window.dispatchEvent(ev);
@@ -88,12 +91,16 @@ var require = function tempRequire(arg) {
   function onModuleLoaderReady() {
     loaderReady = true;
     checkAndLoad();
-    // prevent a leak when the window is reloaded
-    bg.removeEventListener("moduleLoaderReady", onModuleLoaderReady, false);
   }
 
   // listen for the special "moduleLoaderReady" event from the background page
   bg.addEventListener("moduleLoaderReady", onModuleLoaderReady, false);
+
+  window.addEventListener("unload",
+      function treadmill_onUnload() {
+        // prevent a leak when the window is reloaded
+        bg.removeEventListener("moduleLoaderReady", onModuleLoaderReady, false);
+      }, false);
 
   window.addEventListener("load",
       function (ev) {
@@ -247,17 +254,16 @@ function createTestOutputFormatter(stdout) {
  * as <code>require()</code>.
  */
 TREADMILL.jslint = function jslint(aFile) {
-  var url, result;
+  var loader = BACKSTAGE.getModuleLoader().loader;
 
   if (typeof JSLINT !== "function") {
     throw new Error("chrome://kixx/content/packs/jslint/fulljslint.js "+
         "must be included with a script tag for JSLint to work. ");
   }
 
-  url = require.loader.normalize(require.loader.resolve(aFile.slice(0, -3)));
-  result = JSLINT(require.loader.fetch(url));
   TREADMILL.appendOutput(
-      (result ? "passed" : "failed"), JSLINT.report(false));
+      (JSLINT(loader.fetch(loader.resolve(aFile))) ?
+       "passed" : "failed"), JSLINT.report(false));
 };
 
 /**
@@ -276,7 +282,6 @@ TREADMILL.jslint = function jslint(aFile) {
  * @param {function} aCallback Will be called when the test suite is done running.
  */
 TREADMILL.createAndRunTestSuite = function createTestSuite(aName, aTests, aCallback) {
-  dump("requireing simpletest\n");
   var simpletest = require("simpletest/testrunner_1"),
       suite, i;
   suite = new simpletest.TestSuite(

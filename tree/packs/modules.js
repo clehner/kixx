@@ -19,6 +19,8 @@ var require = function tempRequire(arg) {
       "(called by "+ arguments.callee.caller.name +"() for "+ arg +")");
 };
 
+var BACKSTAGE;
+
 (function () {
   var loaderReady = false,
       thisLoaded = false,
@@ -31,20 +33,25 @@ var require = function tempRequire(arg) {
   function checkAndLoad() {
     if ((loaderReady || bg.BACKSTAGE) && thisLoaded) {
       require = bg.BACKSTAGE.require;
+      BACKSTAGE = bg.BACKSTAGE;
       var ev = document.createEvent("Event");
       ev.initEvent("moduleLoaderReady", true, false);
       window.dispatchEvent(ev);
-      return;
     }
   }
 
+  function onModuleLoaderReady() {
+    loaderReady = true;
+    checkAndLoad();
+  }
+
   // listen for the special "moduleLoaderReady" event from the background page
-  bg.addEventListener("moduleLoaderReady",
-      function (ev) {
-        loaderReady = true;
-        checkAndLoad();
+  bg.addEventListener("moduleLoaderReady", onModuleLoaderReady, false);
+
+  window.addEventListener("unload",
+      function treadmill_onUnload() {
         // prevent a leak when the window is reloaded
-        bg.removeEventListener("moduleLoaderReady", arguments.callee, false);
+        bg.removeEventListener("moduleLoaderReady", onModuleLoaderReady, false);
       }, false);
 
   window.addEventListener("load",

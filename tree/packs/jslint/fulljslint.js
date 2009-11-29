@@ -4953,7 +4953,8 @@ loop:   for (;;) {
     reserve('enum');
     reserve('export');
     reserve('extends');
-    reserve('import');
+    // removed for use on Mozilla platform (kixx)
+    // reserve('import');
     reserve('super');
 
     reserve('let');
