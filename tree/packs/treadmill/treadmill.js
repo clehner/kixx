@@ -62,12 +62,7 @@ immed: true
  * listening to the "moduleLoaderReady" DOM event to be fired on the window.
  * </p>
  */
-var BACKSTAGE = {
-  getModuleLoader: function tempLoader(arg) {
-    throw new Error("The BACKSTAGE object is not yet available. "+
-        "(called by "+ arguments.callee.caller.name +"() for "+ arg +")");
-  }
-};
+var BACKSTAGE = null;
 
 
 (function () {

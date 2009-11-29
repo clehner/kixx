@@ -339,9 +339,20 @@ function () {
   }
 
   (function init() {
-    var ev;
+    var ev, procCache = {};
+
     BACKSTAGE.getModuleLoader = getModuleLoader;
-    getModuleLoader("resource://kixx/packs/")("platform/init");
+    BACKSTAGE.moduleRunner = getModuleLoader("resource://kixx/packs/");
+
+    BACKSTAGE.run = function run(aID) {
+      if(!procCache.hasOwnProperty(aID)) {
+        procCache[aID] = BACKSTAGE.moduleRunner(aID);
+      }
+      return procCache[aID];
+    };
+
+    BACKSTAGE.run("platform/init");
+
     ev = document.createEvent("Event");
     ev.initEvent("moduleLoaderReady", true, false);
     window.dispatchEvent(ev);
