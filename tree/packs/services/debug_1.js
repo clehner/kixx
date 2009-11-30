@@ -1,51 +1,54 @@
-function DumpObject()
-{
-  function probeObject(a, aLimit, aSkip, aIndent, COUNT)
-  {
-    if(typeof(a) == "string")
-      return "{string} '"+ a +"'";
-    if(typeof(a) == "number")
-      return "{number} "+ a;
-    if(typeof(a) == "boolean")
-      return "{boolean} "+ a;
-    if(a == null)
-      return "{null}";
-    if(typeof(a) == "undefined")
-      return "{undefined}";
-    if(typeof(a) == "function")
-      return "{function} "+ a.name ;
+function DumpObject() {
+  var COUNT = 0;
 
-    if(typeof(a) == "object")
-    {
-      var str;
-      if(a.length && a.pop && a.push)
-      {
+  function probeObject(a, aLimit, aSkip, aIndent) {
+    var str, i, p;
+
+    if (typeof(a) == "string") {
+      return "{string} '"+ a +"'";
+    }
+    if (typeof(a) == "number") {
+      return "{number} "+ a;
+    }
+    if (typeof(a) == "boolean") {
+      return "{boolean} "+ a;
+    }
+    if (a == null) {
+      return "{null}";
+    }
+    if (typeof(a) == "undefined") {
+      return "{undefined}";
+    }
+    if (typeof(a) == "function") {
+      return "{function} "+ a.name ;
+    }
+
+    if (typeof(a) == "object") {
+      if (a.length && a.pop && a.push) {
         str = "{array} --\n";
-        for(var i = 0; i < a.length; i++)
-        {
-          if(COUNT < aLimit)
-          {
+        for (i = 0; i < a.length; i++) {
+          if(COUNT < aLimit) {
+            COUNT += 1;
             str += aIndent +"["+i+"] = "+ probeObject(
-                a[i], aLimit, aSkip, aIndent +"  ", COUNT += 1) +"\n";
+                a[i], aLimit, aSkip, aIndent +"  ") +"\n";
           }
-          else
+          else {
             str += aIndent +"["+i+"] = TOO MUCH RECURSION\n";
+          }
         }
         return str;
       }
+
       str = "{object} --\n";
-      for(var p in a)
-      {
-        if(COUNT > aLimit)
+      for (p in a) {
+        if(COUNT > aLimit) {
           str += aIndent +"["+p+"] = TOO MUCH RECURSION\n";
-
-        else if(aSkip && aSkip.test(p))
+        } else if (aSkip && aSkip.test(p)) {
           str += aIndent +"["+p+"] = SKIPPED\n";
-
-        else
-        {
+        } else {
+          COUNT += 1;
           str += aIndent +"["+p+"] = "+ probeObject(
-              a[p], aLimit, aSkip, aIndent +"  ", COUNT += 1) +"\n";
+              a[p], aLimit, aSkip, aIndent +"  ") +"\n";
         }
       }
       return str;
@@ -53,14 +56,14 @@ function DumpObject()
     return aIndent +"{unknown}\n";
   }
 
-  function dumpObject(obj, limit, regex)
-  {
-    if(arguments.length == 2 && typeof(limit) == "object") {
+  function dumpObject(obj, limit, regex) {
+    if (arguments.length === 2 && typeof(limit) === "object") {
       regex = limit;
       limit = null;
     }
     limit = limit || 96;
     regex = regex || null;
+    COUNT = 0;
 
     return probeObject(obj, limit, regex, "  ", 0);
   }
@@ -69,6 +72,16 @@ function DumpObject()
 }
 
 exports.dumpObject = DumpObject();
+
+exports.props = function props(a) {
+  var p, rv = "";
+  for (p in a) {
+    if (a.hasOwnProperty(p)) {
+      rv += (p +" : "+ (typeof a[p] === "function" ? "{function}" : a[p]) +"\n");
+    }
+  }
+  return rv;
+};
 
 exports.stack = function debug_stack(caller)
 {

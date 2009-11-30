@@ -80,8 +80,9 @@ window.addEventListener("moduleLoaderReady",
         var rv,
             cmd = this_input.value,
             shell = {
+              require: utils.require,
               dumpObject: utils.dumpObject,
-              viewLog: utils.viewLog
+              props: utils.props
             };
         this_input.value = "";
 
