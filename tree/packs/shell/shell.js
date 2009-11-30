@@ -1,161 +1,132 @@
-var console = null;
-
 /**
+ * @fileOverview
  */
-var CmdLine = {};
-CmdLine.input = null;
-CmdLine.output = null;
 
-CmdLine.init = function CmdLine_init()
-{
-  this.input = document.getElementById("input");
-  this.output = document.getElementById("output");
-
-  this.input.onkeydown = this.onkey;
-  this.reset();
-};
-
-CmdLine.onkey = function CmdLine_onkey(e)
-{
-  if(e.shiftKey && e.keyCode == 13) { // shift-enter
-    Utils.setTextareaRows(CmdLine.input, 1);
-    return true;
+function EXECUTE(text, context, shell) {
+  with (shell) {
+    return context.eval(text);
   }
-  if(e.keyCode == 13) { // enter
-    // execute the input on enter
-    try {
-      CmdLine.ex();
-    } catch(err) {
-      alert(err);
-    }
-    CmdLine.reset();
-    return true;
-  }
-  if(e.ctrlKey && e.keyCode == 38) { // up
-    var val = CmdHist.getLast();
-    if(!val) return true;
-    CmdLine.reset(val);
-    return true;
-  }
-  if(e.ctrlKey && e.keyCode == 40) { // down
-    CmdLine.reset(CmdHist.getNext() || "");
-    return true;
-  }
-  // todo: implement tab complete - we're going to do a module for this
-  return true;
-};
-
-CmdLine.reset = function CmdLine_reset(val)
-{
-  val = val || "";
-  window.setTimeout(function(e) {
-      CmdLine.input.value = val;
-      Utils.setTextareaRows(CmdLine.input, val);
-      CmdLine.input.focus();
-    }, 1);
-};
-
-CmdLine.printInput = function CmdLine_printInput(s)
-{
-  this.println(s, "input");
-};
-
-CmdLine.printStdout = function CmdLine_printStdout(s)
-{
-  if(typeof s == "undefined")
-    return;
-
-  this.println(s.toString(), "output");
-};
-
-// todo: use debug module to pretty print errors
-CmdLine.printError = function CmdLine_printError(e)
-{
-  console.err(e);
-  this.println(e.toString(), "error");
-};
-
-CmdLine.println = function CmdLine_println(ln, type)
-{
-  var ta = document.createElement("textarea");
-  ta.value = ln;
-  ta.className = "outbox" + " "+ type;
-  this.output.appendChild(ta);
-  Utils.setTextareaRows(ta, ln);
-};
-
-CmdLine.ex = function CmdLind_ex()
-{
-  var cmd = this.input.value;
-  this.input.value = "";
-  CmdHist.append(cmd);
-  this.reset();
-  this.printInput(cmd); 
-
-  try {
-    var rv = Shell.eval(cmd);
-    this.printStdout(rv);
-  } catch(e) {
-    this.printError(e);
-  }
-};
-
-/**
- */
-var CmdHist = {};
-
-CmdHist.pointer = 0;
-CmdHist.list = [];
-
-CmdHist.getLast = function CmdHist_getLast()
-{
-  if(this.pointer == 0) return false; 
-  return this.list[this.pointer -= 1];
 }
 
-CmdHist.getNext = function CmdHist_getNext()
-{
-  if(this.pointer == this.list.length) return false;
-  return this.list[this.pointer += 1];
-}
+window.addEventListener("moduleLoaderReady",
+    function () {
+      var utils = BACKSTAGE.run("shell/utils"),
+          this_input = document.getElementById("input"),
+          this_output = document.getElementById("output"),
+          this_historyList = [],
+          this_historyPointer = 0,
+          this_window = window;
 
-CmdHist.append = function CmdHist_append(cmd)
-{
-  this.list.push(cmd);
-  this.pointer = this.list.length;
-}
+      function printLine(ln, type) {
+        var ta = document.createElement("textarea");
+        ta.value = (typeof ln === "undefined" ? "undefined" : (ln +""));
+        ta.className = "outbox" + " "+ type;
+        this_output.appendChild(ta);
+        setTextareaRows(ta, ln);
+      }
 
-/**
- */
-var Shell = null;
+      function printStdout(s) {
+        printLine(s, "output");
+      }
 
-/**
- */
-var Utils = {};
+      function printInput(s) {
+        printLine(s, "input");
+      }
 
-Utils.setTextareaRows = function Utils_setTextareaRows(textarea, input)
-{
-  input = input ? input.toString() : "";
+      function printError(e) {
+        utils.console.err(e);
+        printLine(e, "error");
+      }
 
-  if(input == 1) {
-    textarea.rows += 1;
-    return;
-  }
-  textarea.rows = input.split(/\n/).length;
-};
+      function setTextareaRows(textarea, input) {
+        input = input ? input.toString() : "";
 
-function onWinLoad(e)
-{
-  console = require("platform/utils_1").console;
-  // todo: this functionality should be moved into a firefox specific module.
-  // the memcache module should remain platform agnostic
-  var shell = Components.classes["@mozilla.org/appshell/appShellService;1"]
-            .getService(Components.interfaces.nsIAppShellService);
-  var parentElement = shell.hiddenDOMWindow.document.documentElement;
-  var iframe = parentElement.ownerDocument.getElementById("backstage");
-  var backstage = iframe.contentWindow;
-  Shell = backstage;
-  CmdLine.init();
-}
+        if(input == 1) {
+          textarea.rows += 1;
+          return;
+        }
+        textarea.rows = input.split(/\n/).length;
+      }
 
-window.addEventListener("moduleLoaderReady", onWinLoad, false);
+      function reset(val) {
+        val = val || "";
+        window.setTimeout(function(e) {
+            this_input.value = val;
+            setTextareaRows(this_input, val);
+            this_input.focus();
+          }, 1);
+      }
+
+      function appendHistory(cmd) {
+        this_historyList.push(cmd);
+        this_historyPointer = this_historyList.length;
+      }
+
+      function getLastHistory() {
+        if (this_historyPointer === 0) {
+          return false; 
+        }
+        return this_historyList[this_historyPointer -= 1];
+      }
+
+      function getNextHistory() {
+        if(this_historyPointer === this_historyList.length) {
+          return false;
+        }
+        return this_historyList[this_historyPointer += 1];
+      }
+
+      function execute() {
+        var rv,
+            cmd = this_input.value,
+            shell = {
+              dumpObject: utils.dumpObject,
+              viewLog: utils.viewLog
+            };
+        this_input.value = "";
+
+        appendHistory(cmd);
+        reset();
+        printInput(cmd); 
+
+        try {
+          rv = EXECUTE(cmd, this_window, shell);
+          printStdout(rv);
+        } catch(e) {
+          printError(e);
+        }
+      }
+
+      this_input.onkeydown = function onkey(e) {
+        if(e.shiftKey && e.keyCode == 13) { // shift-enter
+          setTextareaRows(this_input, 1);
+          return true;
+        }
+        if(e.keyCode == 13) { // enter
+          // execute the input on enter
+          try {
+            execute();
+          } catch(err) {
+            alert(err);
+          }
+          reset();
+          return true;
+        }
+        if(e.ctrlKey && e.keyCode == 38) { // up
+          var val = getLastHistory();
+          if(!val) {
+            return true;
+          }
+          reset(val);
+          return true;
+        }
+        if(e.ctrlKey && e.keyCode == 40) { // down
+          reset(getNextHistory() || "");
+          return true;
+        }
+        // todo: implement tab complete - we're going to do a module for this
+      };
+
+      // get started
+      reset();
+    }, false);
