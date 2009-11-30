@@ -250,24 +250,25 @@ file.create = function file_create(aFile) {
 };
 
 // todo: there should be a max bytes parameter for this
-file.read = function file_read(file)
-{
-  var fs = Components.classes["@mozilla.org/network/file-input-stream;1"].
-              createInstance(Components.interfaces.nsIFileInputStream);
-  var cs = Components.classes["@mozilla.org/intl/converter-input-stream;1"].
+file.read = function file_read(file) {
+  var str = "", data = {},
+      fs = Components.classes["@mozilla.org/network/file-input-stream;1"].
+              createInstance(Components.interfaces.nsIFileInputStream),
+      cs = Components.classes["@mozilla.org/intl/converter-input-stream;1"].
               createInstance(Components.interfaces.nsIConverterInputStream);
+
   fs.init(file, -1, 0, 0);
   // todo: what are the concequences of using a converter?
   // is it needed?
   cs.init(fs, "UTF-8", 0, 0); // you can use another encoding here if you wish
 
-  var data = "";
-  var str = {};
-  cs.readString(-1, str); // read the whole file and put it in str.value
-  data = str.value;
-  cs.close(); // this closes fstream
+  while(cs.readString(4096, data) !== 0) {
+    str += data.value;
+  }
+  cs.close();
+  fs.close();
 
-  return data;
+  return str;
 };
 
 /**
