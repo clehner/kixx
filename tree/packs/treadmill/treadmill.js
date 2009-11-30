@@ -64,10 +64,10 @@ immed: true
  */
 var BACKSTAGE = null;
 
-
 (function () {
   var loaderReady = false,
       thisLoaded = false,
+      notified = false,
       
       bg = Components.classes["@mozilla.org/appshell/appShellService;1"].
                   getService(Components.interfaces.nsIAppShellService).
@@ -75,7 +75,12 @@ var BACKSTAGE = null;
                   contentWindow;
 
   function checkAndLoad() {
+    if (notified) {
+      return;
+    }
+
     if ((loaderReady || bg.BACKSTAGE.getModuleLoader) && thisLoaded) {
+      notified = true;
       BACKSTAGE = bg.BACKSTAGE;
       var ev = document.createEvent("Event");
       ev.initEvent("moduleLoaderReady", true, false);
