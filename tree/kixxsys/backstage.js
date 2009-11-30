@@ -57,6 +57,17 @@ BACKSTAGE.evaluate = function global_evaluate(aText, aLocation) {
   }
 };
 
+/**
+ */
+BACKSTAGE.platform = (function constructPlatform() {
+      return Components.classes["@mozilla.org/fuel/application;1"].
+                 getService(Components.interfaces.fuelIApplication);
+      // todo: the platform object needs to dynamically detect what platform
+      // we are actually running on
+      // todo: FUEL only works for Firefox
+      // https://developer.mozilla.org/en/FUEL/Application#See_also
+    }());
+
 // Will be populated by ../packs/chiron/lib/chiron/modules.js
 var exports = BACKSTAGE.chiron = {};
 
@@ -79,22 +90,13 @@ function () {
 
   // constructor for the 'sys' or 'system' object
   function constructSys() {
-    var print,
-        
-        platform = Components.classes["@mozilla.org/fuel/application;1"].
-                   getService(Components.interfaces.fuelIApplication);
-        // todo: the platform object needs to dynamically detect what platform
-        // we are actually running on
-        // todo: FUEL only works for Firefox
-        // https://developer.mozilla.org/en/FUEL/Application#See_also
-   
-    print = function (msg, label) {
-            label = label || "log";
-            msg = ((typeof msg === "undefined") ? "undefined" : msg +"");
-            platform.console.log(label +": "+ msg +"\n");
-        };
+    function print(msg, label) {
+      label = label || "log";
+      msg = ((typeof msg === "undefined") ? "undefined" : msg +"");
+      BACKSTAGE.platform.console.log(label +": "+ msg +"\n");
+    }
 
-    return {platform: platform, print: print};
+    return {platform: BACKSTAGE.platform, print: print};
   }
 
   // constructor for a module loader (require()) sandbox.
@@ -265,7 +267,7 @@ function () {
                             factoryEx.message,
                             factoryEx.lineNumber,
                             deliberateEx.lineNumber,
-                            218);
+                            220);
           // todo: the offset number (the last param to moduleError() is
           // dependent on how many lines we are from the evaluation point in
           // this file, and as such, is subject to failure if any code changes
