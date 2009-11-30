@@ -3,6 +3,7 @@
 var platform = require("platform/firefox/utils_1");
 
 exports.getCurrentWindow = platform.getCurrentWindow;
+exports.getAllWindows = platform.getAllWindows;
 exports.installToolbarButton = platform.installToolbarButton;
 exports.file = platform.file;
 exports.openNewTab = platform.tabs.openNewTab;

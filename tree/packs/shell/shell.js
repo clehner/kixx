@@ -81,8 +81,17 @@ window.addEventListener("moduleLoaderReady",
             cmd = this_input.value,
             shell = {
               require: utils.require,
+              getWindows: function getWindows() {
+                var wins = utils.getWindows();
+                for (var p in wins) {
+                  dump(p+"\n");
+                }
+              },
               dumpObject: utils.dumpObject,
-              props: utils.props
+              props: utils.props,
+              pr: function print(s) {
+                return s;
+              }
             };
         this_input.value = "";
 

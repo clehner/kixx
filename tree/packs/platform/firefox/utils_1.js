@@ -2,20 +2,47 @@ exports.MOZID = "kixx@fireworksproject.com";
 
 var log = require("services/log_1");
 
+function getTabBrowsers(browser) {
+  var index, tabs = [],
+      numTabs = browser.browsers.length;
+  for (index = 0; index < numTabs; index += 1) {
+    tabs.push(browser.getBrowserAtIndex(index).contentWindow);
+  }
+  return tabs;
+}
+
 // !gotcha: this does not necessarily return the browser window
 // todo: maybe this should only return the most recent browser window
 // to be more inline with chromium?
-exports.getCurrentWindow = function getCurrentWindow(aCallback)
-{
+exports.getCurrentWindow = function getCurrentWindow(aCallback) {
+  var win, index;
   // todo: this should be an assert rather than a thrown error
   if(typeof aCallback != "function") {
     throw new Error("platform.utils.firefox.utils.getCurrentWindow() "+
         "must be passed a callback function");
   }
-  var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]  
-             .getService(Components.interfaces.nsIWindowMediator);  
-  aCallback(wm.getMostRecentWindow("navigator:browser"));
+  win = Components.classes["@mozilla.org/appshell/window-mediator;1"].
+             getService(Components.interfaces.nsIWindowMediator).
+             getMostRecentWindow("navigator:browser");
+  win.tabs = getTabBrowsers(win.gBrowser);
+  aCallback(win);
 }
+
+// todo: make a window object compatible with Chromium
+exports.getAllWindows = function getAllWindows(aCallback) {
+  var wins = [],
+      win,
+      list = Components.classes["@mozilla.org/appshell/window-mediator;1"].
+             getService(Components.interfaces.nsIWindowMediator).
+             getEnumerator("navigator:browser");  
+
+  while (list.hasMoreElements()) {
+    win = list.getNext();
+    win.tabs = getTabBrowsers(win.gBrowser);
+    wins.push(win);
+  }
+  aCallback(wins);
+};
 
 var console = {};
 
