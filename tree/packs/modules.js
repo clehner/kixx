@@ -31,7 +31,7 @@ var BACKSTAGE = null;
       return;
     }
 
-    if ((loaderReady || bg.BACKSTAGE.getModuleLoader) && thisLoaded) {
+    if ((loaderReady || bg.BACKSTAGE.run) && thisLoaded) {
       notified = true;
       BACKSTAGE = bg.BACKSTAGE;
       var ev = document.createEvent("Event");

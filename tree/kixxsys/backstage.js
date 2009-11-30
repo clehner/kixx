@@ -342,11 +342,10 @@ function () {
     var ev, procCache = {};
 
     BACKSTAGE.getModuleLoader = getModuleLoader;
-    BACKSTAGE.moduleRunner = getModuleLoader("resource://kixx/packs/");
 
     BACKSTAGE.run = function run(aID) {
       if(!procCache.hasOwnProperty(aID)) {
-        procCache[aID] = BACKSTAGE.moduleRunner(aID);
+        procCache[aID] = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(aID);
       }
       return procCache[aID];
     };
