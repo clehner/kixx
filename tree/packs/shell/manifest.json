@@ -1,6 +1,6 @@
 {
 "launcher":{
   "icon": "icon.png",
-  "url": "shell.xhtml"
+  "url": "shell.html"
 }
 }
