@@ -212,6 +212,10 @@ function () {
             if (typeof aURI !== "string") {
               throw new Error("load() was passed unexpected non-string parameter: "+ aURI);
             }
+            if (!ml_factoryCache) {
+              throw new Error("A process has not been started for this module loader.");
+            }
+
             if (!ml_factoryCache.hasOwnProperty(aURI)) {
               ml_factoryCache[aURI] = evaluate(fetch(aURI), aURI);
             }
@@ -224,6 +228,10 @@ function () {
             if (typeof aURI !== "string") {
               throw new Error("reload() was passed unexpected non-string parameter: "+ aURI);
             }
+            if (!ml_factoryCache) {
+              throw new Error("A process has not been started for this module loader.");
+            }
+
             ml_factoryCache[aURI] = evaluate(fetch(aURI), aURI);
             delete ml_moduleCache[aURI];
           }
@@ -267,7 +275,7 @@ function () {
                             factoryEx.message,
                             factoryEx.lineNumber,
                             deliberateEx.lineNumber,
-                            220);
+                            228);
           // todo: the offset number (the last param to moduleError() is
           // dependent on how many lines we are from the evaluation point in
           // this file, and as such, is subject to failure if any code changes
@@ -298,7 +306,8 @@ function () {
      * The only public entry point to start a process with a module loader
      */
     function run(aID) {
-      var pre = 0,
+      var pub = {},
+          pre = 0,
           processCache,
           key = new Date(),
           failed = true;
@@ -332,10 +341,20 @@ function () {
       ml_factoryCache = processCache.factories = {};
 
       ml_main = ml_loader.resolve(aID, ml_path);
-      return ml_sandbox(aID, ml_path);
+
+      pub.restart = function restart() {
+      };
+
+      pub.module = ml_sandbox(aID, ml_path);
+
+      return pub;
     }
 
-    run.loader = ml_loader;
+    run.loader = {
+      fetch: ml_loader.fetch,
+      evaluate: ml_loader.evaluate,
+      resolve: ml_loader.resolve
+    };
 
     return run;
   }

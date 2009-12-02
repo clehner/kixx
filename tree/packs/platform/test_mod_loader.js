@@ -108,7 +108,7 @@ var MLT = (function () {
         "Throw an internal exception.("+ e +")");
     }
 
-    fileUtils = BACKSTAGE.getModuleLoader("resource://kixx/packs/")("services/os_1").file;
+    fileUtils = BACKSTAGE.getModuleLoader("resource://kixx/packs/")("services/os_1").module.file;
 
     (function () {
       var file, val_1, val_2, imported;
@@ -119,11 +119,11 @@ var MLT = (function () {
       file.append("mutated_import.js");
       fileUtils.write(file, "exports.myNumber = 7;");
       imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import");
+        "platform/testing/mutated_import").module;
       val_1 = imported.myNumber;
       fileUtils.write(file, "exports.myNumber = 9;");
       imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import");
+        "platform/testing/mutated_import").module;
       val_2 = imported.myNumber;
 
       assert(val_1 !== val_2,
@@ -146,7 +146,7 @@ var MLT = (function () {
     (function () {
       var scopes,
           ml = BACKSTAGE.getModuleLoader("resource://kixx/packs/");
-      scopes = ml("platform/testing/eval_globals");
+      scopes = ml("platform/testing/eval_globals").module;
       assert(typeof scopes.checkBackstage() === "object",
         "backstage scope should not be available. "+
         "("+ typeof scopes.checkBackstage() +")");
@@ -175,7 +175,7 @@ var MLT = (function () {
 
     (function () {
       var mod = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/reload");
+        "platform/testing/reload").module;
       assert(typeof mod.val_1 === "number", "val_1 is a number");
       assert(typeof mod.val_2 === "number", "val_2 is a number");
       assert(mod.val_1 !== mod.val_2, "mod.val_1 !== mod.val_2");
