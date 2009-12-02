@@ -306,43 +306,36 @@ function () {
      * The only public entry point to start a process with a module loader
      */
     function run(aID) {
-      var pub = {},
-          pre = 0,
-          processCache,
-          key = new Date(),
-          failed = true;
+      var pub = {}, processCache, key;
       
       if (typeof aID !== "string") {
         throw new Error("Unexpected module id passed to module loader: "+ aID);
       }
 
-      // if this module loader has already been run,
-      // raise an exception
-      if (ml_main) {
-        throw new Error("Module loader has already been run. "+
-            "(called from "+ (run.caller.name || "anonymous") +"())");
-      }
-
-      while(failed) {
-        key = key.getTime() +":"+ pre;
+      // this key is the same as ml_main or require().main
+      key = ml_loader.resolve(aID, ml_path);
       
-        try {
-          processCache = cache(key);
-          failed = false;
-        } catch(e) {
-          if (e !== ("Shared cache key '"+ key +"' already exists.")) {
+      try {
+        processCache = cache.create(key);
+      } catch(e) {
+        if (e !== ("Shared cache key '"+ key +"' already exists.")) {
             throw e;
-          }
-          pre += 1;
         }
+        throw new Error("Module loader has already been run for "+ key +
+            ". Called by "+ (run.caller.name || "anonymous") +"()");
       }
 
       ml_moduleCache = processCache.modules = {};
       ml_factoryCache = processCache.factories = {};
+      ml_main = key;
 
-      ml_main = ml_loader.resolve(aID, ml_path);
+      pub.kill = function kill() {
+        cache.destroy(key);
+      };
 
       pub.restart = function restart() {
+        cache.destroy(key);
+        return run(aID);
       };
 
       pub.module = ml_sandbox(aID, ml_path);

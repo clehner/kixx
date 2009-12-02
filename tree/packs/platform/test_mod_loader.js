@@ -75,14 +75,26 @@ var MLT = (function () {
     TREADMILL.jslint("../kixxsys/backstage");
 
     (function () {
-      var a = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-            "platform/testing/mutated_import"),
-          b = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-            "platform/testing/mutated_import"),
-          c = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-            "platform/testing/mutated_import");
+      var a, b, err = false;
 
-      assert((a !== b && b !== c), "loaded modules are not ===");
+      a = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
+        "platform/testing/mutated_import");
+
+      try {
+        b = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
+          "platform/testing/mutated_import");
+      } catch(e) {
+        err = true;
+      }
+      assert(err, "module should not load more than once.");
+      a.kill();
+
+      a = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
+        "platform/testing/mutated_import"),
+      a.kill();
+      b = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
+        "platform/testing/mutated_import");
+      b.kill();
     }());
 
     evaluate = BACKSTAGE.getModuleLoader().loader.evaluate;
@@ -119,28 +131,28 @@ var MLT = (function () {
       file.append("mutated_import.js");
       fileUtils.write(file, "exports.myNumber = 7;");
       imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import").module;
-      val_1 = imported.myNumber;
+        "platform/testing/mutated_import");
+      val_1 = imported.module.myNumber;
+      imported.kill();
       fileUtils.write(file, "exports.myNumber = 9;");
       imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import").module;
-      val_2 = imported.myNumber;
+        "platform/testing/mutated_import");
+      val_2 = imported.module.myNumber;
+      imported.kill();
 
       assert(val_1 !== val_2,
         "val_1 === val_2, ("+ val_1 +" === "+ val_2 +")");
-    }());
 
-    (function () {
-      var imported,
-          ml = BACKSTAGE.getModuleLoader("resource://kixx/packs/");
-      imported = ml("platform/testing/mutated_import");
-      try {
-        imported = ml("platform/testing/mutated_import");
-      } catch(e) {
-        assert(e.message === "Module loader has already been run. (called from anonymous())",
-          "A module cannot be run more than once. "+
-          "("+ e.message +")");
-      }
+      // test restart
+      fileUtils.write(file, "exports.myNumber = 7;");
+      imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
+        "platform/testing/mutated_import");
+      val_1 = imported.module.myNumber;
+      fileUtils.write(file, "exports.myNumber = 9;");
+      val_2 = imported.restart().module.myNumber;
+
+      assert(val_1 !== val_2,
+        "val_1 === val_2, ("+ val_1 +" === "+ val_2 +")");
     }());
 
     (function () {
