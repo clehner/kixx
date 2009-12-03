@@ -1,0 +1,74 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font: 14px sans-serif;
+  color: #333;
+  background: #eee;
+}
+
+#header {
+  background: #039;
+  clear: both;
+}
+
+#header > h1 {
+  float: left;
+  color: #fc3;
+  padding: 0.7em 1em 0 1em;
+}
+
+#header > h2 {
+  color: #eee;
+  padding: 1.2em 1em 0.7em 1em;
+}
+
+#reload {
+  position: absolute;
+  top: 5px;
+  padding: 0.2em 1em 0 0;
+  color: #ccc;
+  cursor: pointer;
+  right: 0px;
+}
+
+#tabs {
+  clear: both;
+  background: #039;
+  height: 2.2em;
+}
+
+#tabs > div {
+  float: left;
+  margin: 0 0.4em 0 0;
+  padding: 0.5em 1em 0.5em 1em;
+  width: 14%;
+  font-weight: bold;
+}
+
+#tabs > div > a {
+  text-decoration: none;
+}
+
+.tab {
+  background: #06c;
+}
+
+.tab > a {
+  color: #eee;
+}
+
+.current-tab {
+  background: #eee;
+}
+
+.current-tab > a {
+  color: #06c;
+}
+
+#panel {
+  clear: both;
+  margin: 2em 2em 0 10%;
+}
