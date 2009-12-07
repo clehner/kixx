@@ -9,6 +9,11 @@ body {
   background: #eee;
 }
 
+.clickable {
+  color: blue;
+  cursor: pointer;
+}
+
 #header {
   background: #039;
   clear: both;

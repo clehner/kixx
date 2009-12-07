@@ -3,6 +3,8 @@
 
 var LOC = "http://localhost:8080";
 
+var CACHE = {};
+
 function makeRequest(aLoc, aMethod, aCallback, aBody) {
   var req = new XMLHttpRequest(),
       loc = LOC +"/content-manager/"+ aLoc;
@@ -19,6 +21,23 @@ function makeRequest(aLoc, aMethod, aCallback, aBody) {
   req.send((aBody || null));
 }
 
+function updateData(aLocation, aData, aID) {
+  var i;
+
+  if (!CACHE.hasOwnProperty(aLocation)) {
+    CACHE[aLocation] = [];
+  }
+
+  for (i = 0; i < CACHE[aLocation].length; i += 1) {
+    if (CACHE[aLocation][i][aID] === aData[aID]) {
+      CACHE[aLocation][i] = aData;
+      return;
+    }
+  }
+
+  CACHE[aLocation].push(aData);
+}
+
 // [aItem.id]
 // aItem.content
 // aItem.description
@@ -27,9 +46,12 @@ exports.postContent = function postContent(aItem, aCallback) {
 
   makeRequest("inventory/", "POST",
       function (stat, text) {
+        var item;
         if (stat !== 200) {
-          sys.print(text, "invalid status code for inventory/ ("+ stat +")");
+          sys.print(text, "invalid status code for POST to inventory/ ("+ stat +")");
         }
+        item = JSON.parse(text);
+        updateData("inventory/", item, "id");
         aCallback(stat);
       }, body);
 };
@@ -37,7 +59,10 @@ exports.postContent = function postContent(aItem, aCallback) {
 exports.putPage = function putPage(aName, aConfigs, aCallback) {
   makeRequest("pages/"+ aName, "PUT",
       function (stat, text) {
+        var page;
         if (stat === 200 || stat === 201) {
+          page = JSON.parse(text);
+          updateData("pages/", page, "uri");
           aCallback(stat);
           return;
         }
@@ -45,87 +70,6 @@ exports.putPage = function putPage(aName, aConfigs, aCallback) {
         aCallback(0);
       }, aConfigs);
 };
-
-exports.getConfigsHTML = (function () {
-    var html = "";
-
-    function getConfigsHTML(aCallback, aReload) {
-      if (aReload) {
-        html = "";
-      }
-
-      if (html) {
-        aCallback(html);
-        return;
-      }
-
-      makeRequest("configs", "GET",
-          function (stat, text) {
-            var configs, p;
-            html = '<ol id="page-list">';
-
-            if (stat !== 200) {
-              sys.print(text, "invalid status code for configs ("+ stat +")");
-              return;
-            }
-            try {
-              configs = JSON.parse(text);
-            } catch(err) {
-              sys.print(text, "Could not parse JSON data for configs");
-              return;
-            }
-            
-            for (p in configs) {
-              if (configs.hasOwnProperty(p)) {
-                html += ('<li><b>'+ p +' ::</b> '+ configs[p][1] +'<br />current page: '+
-                  '<a href="pages.html?page='+ configs[p][0] +'">'+ configs[p][0] +'</a></li>');
-              }
-            }
-
-            html += '</ol>';
-            aCallback(html);
-          });
-    }
-    return getConfigsHTML;
-}());
-
-exports.getTemplatesHTML = (function () {
-    var html = "";
-
-    function getTemplatesHTML(aCallback, aReload) {
-      if (aReload) {
-        html = "";
-      }
-
-      if (html) {
-        aCallback(html);
-        return;
-      }
-
-      makeRequest("templates/", "GET",
-          function (stat, text) {
-            var templates, i;
-            if (stat !== 200) {
-              sys.print(text, "invalid status code for templates/ ("+ stat +")");
-              return;
-            }
-            try {
-              templates = JSON.parse(text);
-            } catch(err) {
-              sys.print(text, "Could not parse JSON data for templates/");
-              return;
-            }
-            
-            for (i = 0; i < templates.length; i++) {
-              html += ('<div><h4>'+ templates[i].name +'</h4><textarea class="template">'+
-                templates[i].content +'</textarea></div>');
-            }
-
-            aCallback(html);
-          });
-    }
-    return getTemplatesHTML;
-}());
 
 exports.getContentHTML = (function () {
     var html = "";
@@ -152,13 +96,14 @@ exports.getContentHTML = (function () {
           try {
             inv = JSON.parse(text);
           } catch(err) {
-            sys.print(text, "Could not parse JSON data for content inventory");
-            return;
+
           }
 
           for (i = 0; i < inv.length; i += 1) {
-            html += ('<div class="content-item" key="'+ inv[i].id +'"><h4>'+
-              (inv[i].description || 'no decription') +'</h4><textarea>'+
+            html += ('<div class="content-item"><p>id: '+ inv[i].id +
+              '</p><p>description: <input type="text" size="50" value="'+
+              (inv[i].description || 'no decription')
+              +'" /></p><p>content:<br /><textarea class="content-input">'+
               inv[i].content[inv[i].content.length -1] +'</textarea></div>');
           }
           aCallback(html);
@@ -166,6 +111,48 @@ exports.getContentHTML = (function () {
     }
     return getContentHTML;
 }());
+
+function fetch(aLocation, aCallback) {
+  if (CACHE.hasOwnProperty(aLocation)) {
+    aCallback(CACHE[aLocation]);
+    return;
+  }
+
+  makeRequest(aLocation, "GET",
+    function (stat, text) {
+      var data;
+
+      if (stat !== 200) {
+        sys.print(text,
+          "invalid status code for "+ aLocation +" ("+ stat +")");
+        return;
+      }
+      try {
+        data = JSON.parse(text);
+      } catch(err) {
+        sys.print(text, "Could not parse JSON data for "+ aLocation);
+        return;
+      }
+      CACHE[aLocation] = data;
+      aCallback(data);
+    });
+}
+
+exports.templates = function templates(aCallback) {
+  fetch("templates/", aCallback);
+};
+
+exports.content = function content(aCallback) {
+  fetch("inventory/", aCallback);
+};
+
+exports.pages = function pages(aCallback) {
+  fetch("pages/", aCallback);
+};
+
+exports.configs = function configs(aCallback) {
+  fetch("configs", aCallback);
+};
 
 if (module.id === require.main) {
   sys.print("Fireworks Website CMS loaded.");
