@@ -18,6 +18,9 @@
       width: 40em;
       height: 10em;
     }
+    h3 {
+      margin-top: 2em;
+    }
   </style>
 
 </head>
@@ -39,7 +42,10 @@
   <h4 class="warning">
     Do not edit configurations unless you know what you are doing.
   </h4>
-  <div id="page-list-ctn"/>
+  <div id="page-list-ctn"></div>
+  <h3>Default Context</h3>
+  <textarea id="defaults" class="configs"></textarea>
+  <p><button onclick="putDefaults()">put</button>
 </div>
 </body>
 <script src="../modules.js"></script>

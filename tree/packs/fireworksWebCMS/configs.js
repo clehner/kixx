@@ -3,7 +3,8 @@
 
 var DATA = {
   configs: null,
-  pages: null
+  pages: null,
+  defaults: null
 };
 
 function showPage(aName, aIndex, aNode) {
@@ -41,7 +42,7 @@ function getConfiguredPage(aConfig, aPages) {
   return null;
 }
 
-function populate(aConfigs, aPages) {
+function populate(aConfigs, aPages, aDefaults) {
   var n, page, html = '<ol class="page-list">';
 
   for (n in aConfigs) {
@@ -56,6 +57,19 @@ function populate(aConfigs, aPages) {
 
   html += '</ol>';
   document.getElementById("page-list-ctn").innerHTML = html;
+
+  document.getElementById("defaults").value = JSON.stringify(aDefaults);
+}
+
+function putDefaults() {
+  CMS.putDefaults((document.getElementById("defaults").value || "{}"),
+      function (stat) {
+        if (!stat) {
+          alert("Failed");
+          return;
+        }
+        alert("Updated");
+      });
 }
 
 function start() {
@@ -65,8 +79,8 @@ function start() {
   };
 
   function check() {
-    if (DATA.configs && DATA.pages) {
-      populate(DATA.configs, DATA.pages);
+    if (DATA.configs && DATA.pages && DATA.defaults) {
+      populate(DATA.configs, DATA.pages, DATA.defaults);
     }
   }
 
@@ -76,6 +90,10 @@ function start() {
       });
   CMS.configs(function (data) {
         DATA.configs = data;
+        check();
+      });
+  CMS.defaults(function (data) {
+        DATA.defaults = data;
         check();
       });
 }

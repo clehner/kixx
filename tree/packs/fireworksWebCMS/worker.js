@@ -71,6 +71,19 @@ exports.putPage = function putPage(aName, aConfigs, aCallback) {
       }, aConfigs);
 };
 
+exports.putDefaults = function putDefaults(aBody, aCallback) {
+  makeRequest("defaults", "PUT",
+      function (stat, text) {
+        if (stat === 200 || stat === 201) {
+          CACHE["defaults"] = JSON.parse(text);
+          aCallback(stat);
+          return;
+        }
+        sys.print(text, "invalid status code for defaults ("+ stat +")");
+        aCallback(0);
+      }, aBody);
+};
+
 exports.getContentHTML = (function () {
     var html = "";
 
@@ -153,6 +166,10 @@ exports.pages = function pages(aCallback) {
 exports.configs = function configs(aCallback) {
   fetch("configs", aCallback);
 };
+
+exports.defaults = function defaults(aCallback) {
+  fetch("defaults", aCallback);
+}
 
 if (module.id === require.main) {
   sys.print("Fireworks Website CMS loaded.");
