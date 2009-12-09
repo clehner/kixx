@@ -1,7 +1,7 @@
 /**
  */
 
-var LOC = "http://localhost:8080";
+var LOC = "http://3.latest.fireworkscomputer.appspot.com";
 
 var CACHE = {};
 

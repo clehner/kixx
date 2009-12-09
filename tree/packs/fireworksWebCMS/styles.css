@@ -9,9 +9,33 @@ body {
   background: #eee;
 }
 
+h2 {
+  padding: 0 0 0.7em 0;
+}
+
+h3 {
+  padding: 0 0 1em 0;
+}
+
+h4 {
+  padding: 2em 0 1em 0;
+}
+
+p {
+  margin: 0 0 1em 0;
+}
+
+ul {
+  padding: 0 0 0 2em;
+}
+
 .clickable {
   color: blue;
   cursor: pointer;
+}
+
+.warning {
+  color: #f00;
 }
 
 #header {
@@ -75,5 +99,5 @@ body {
 
 #panel {
   clear: both;
-  margin: 2em 2em 0 10%;
+  margin: 2em 10% 0 10%;
 }

@@ -7,35 +7,38 @@
  */
 var CMS;
 
-window.addEventListener("moduleLoaderReady",
-    function () {
-      var proc;
+function onLoad() {
+  var proc;
 
-      window.removeEventListener("moduleLoaderReady", arguments.callee, false);
+  try {
+    proc = BACKSTAGE.run("fireworksWebCMS/worker");
+  } catch(e) {
+    alert(e);
+  }
 
-      try {
-        proc = BACKSTAGE.run("fireworksWebCMS/worker");
-      } catch(e) {
-        alert(e);
+  (function bind() {
+    CMS = {};
+    for (p in proc.module) {
+      if (proc.module.hasOwnProperty(p)) {
+        CMS[p] = proc.module[p];
       }
+    };
 
-      (function bind() {
-        CMS = {};
-        for (p in proc.module) {
-          if (proc.module.hasOwnProperty(p)) {
-            CMS[p] = proc.module[p];
-          }
-        };
+    CMS.restart = function restart() {
+      var newproc = proc.restart();
+      proc = newproc;
+      bind();
+      alert("restarted process");
+    };
+  }());
 
-        CMS.restart = function restart() {
-          var newproc = proc.restart();
-          proc = newproc;
-          bind();
-          alert("restarted process");
-        };
-      }());
+  // we expect a start function on each page
+  start();
+}
 
-      // we expect a start function on each page
-      start();
+window.addEventListener("moduleLoaderReady", onLoad, false);
 
+window.addEventListener("unload",
+    function() {
+      window.removeEventListener("moduleLoaderReady", onLoad, false);
     }, false);

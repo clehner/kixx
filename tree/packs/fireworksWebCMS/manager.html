@@ -19,12 +19,78 @@
 </div>
 <div id="tabs">
   <div class="current-tab"><a href="manager.html">Start</a></div>
+  <div class="tab"><a href="inventory.html">Inventory</a></div>
   <div class="tab"><a href="configs.html">Configuration</a></div>
   <div class="tab"><a href="templates.html">Templates</a></div>
-  <div class="tab"><a href="inventory.html">Inventory</a></div>
 </div>
 <div id="panel">
-  <p>Todo: Write tutorial.</p>
+  <h2>QD-CMS</h2>
+  <h3>Quick and Dirty Content Management System</h3>
+
+  <h4>Overview</h4>
+  <p>
+  Our website runs on the
+  <a href="http://code.google.com/appengine/">Google App Engine (GAE) platform</a>.
+  It is written in
+  <a href="http://docs.python.org/">Python</a>
+  and uses a quick and dirty content management system with
+  <a href="http://docs.djangoproject.com/en/dev/ref/templates/">Django templates</a>.
+  Communication between this toolpack and the GAE host is done with a
+  <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">RESTful</a>
+  <a href="http://en.wikipedia.org/wiki/Application_programming_interface">api</a>
+  using
+  <a href="http://en.wikipedia.org/wiki/HyperText_Transfer_Protocol">HTTP</a>
+  +
+  <a href="http://www.json.org/">JSON</a>.
+  </p>
+  Use this list of links to see the raw api:
+  <ul>
+    <li>
+    <a href="http://www.fireworksproject.com/content-manager/configs">
+      http://www.fireworksproject.com/content-manager/configs</a>
+    </li>
+    <li>
+    <a href="http://www.fireworksproject.com/content-manager/templates/">
+      http://www.fireworksproject.com/content-manager/templates/</a>
+    </li>
+    <li>
+    <a href="http://www.fireworksproject.com/content-manager/inventory/">
+      http://www.fireworksproject.com/content-manager/inventory/</a>
+    </li>
+    <li>
+    <a href="http://www.fireworksproject.com/content-manager/pages/">
+      http://www.fireworksproject.com/content-manager/pages/</a>
+    </li>
+  </ul>
+
+  <h4>The Inventory Tab</h4>
+  <p>
+  The inventory tab will be the most used area of this toolpack. It provides a
+  list of our complete content inventory for the whole website.  More
+  importantly, each content item on every page can be changed, edited, and
+  updated using the content inventory tab. For the time being, the only way to
+  identify where a content inventory item appears on the live website is to
+  look at the description of it, so we need to make sure our descriptions are
+  accurate when we post new inventory items.
+  </p>
+
+  <h4>Configuration Tab</h4>
+  <p>
+  The configuration tab provides a list of all the currently live pages and
+  provides a form to edit the JSON configurations of each page. You should
+  not edit any of the configurations unless you really know what you are doing.
+  </p>
+
+  <h4>Templates Tab</h4>
+  <p>
+  The templates tab simply provides a list of all the currently live templates
+  for reference.
+  </p>
+
+  <p>
+  Please help with ideas to make our QD-CMS more useful ;-)
+  </p>
+
 </div>
 </body>
 <script src="../modules.js"></script>
