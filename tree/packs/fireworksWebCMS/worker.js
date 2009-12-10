@@ -2,6 +2,7 @@
  */
 
 var LOC = "http://3.latest.fireworkscomputer.appspot.com";
+//var LOC = "http://localhost:8080";
 
 var CACHE = {};
 

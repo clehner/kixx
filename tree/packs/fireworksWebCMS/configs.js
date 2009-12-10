@@ -62,7 +62,14 @@ function populate(aConfigs, aPages, aDefaults) {
 }
 
 function putDefaults() {
-  CMS.putDefaults((document.getElementById("defaults").value || "{}"),
+  var text = (document.getElementById("defaults").value || "{}");
+  try {
+    JSON.parse(text);
+  } catch (e) {
+    alert("Invalid JSON: "+ text);
+    return;
+  }
+  CMS.putDefaults(text,
       function (stat) {
         if (!stat) {
           alert("Failed");
