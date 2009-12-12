@@ -78,11 +78,11 @@ var MLT = (function () {
       var a, b, err = false;
 
       a = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import");
+        "platform/testing/testmods/mutated_import");
 
       try {
         b = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-          "platform/testing/mutated_import");
+          "platform/testing/testmods/mutated_import");
       } catch(e) {
         err = true;
       }
@@ -90,10 +90,10 @@ var MLT = (function () {
       a.kill();
 
       a = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import"),
+        "platform/testing/testmods/mutated_import"),
       a.kill();
       b = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import");
+        "platform/testing/testmods/mutated_import");
       b.kill();
     }());
 
@@ -106,7 +106,7 @@ var MLT = (function () {
     }
 
     try {
-      BACKSTAGE.getModuleLoader("resource://kixx/packs/")("platform/testing/throw_error");
+      a = BACKSTAGE.getModuleLoader("resource://kixx/packs/")("platform/testing/testmods/throw_error");
     } catch(e) {
       assert(e.lineNumber === 5,
         "Get a correct line number from run().("+ e +" : "+ e.lineNumber +")");
@@ -114,7 +114,7 @@ var MLT = (function () {
 
     try {
       BACKSTAGE.getModuleLoader(
-          "resource://kixx/packs/")("platform/testing/this_module_doesnot_exist");
+          "resource://kixx/packs/")("platform/testing/testmods/this_module_doesnot_exist");
     } catch(e) {
       assert(e.constructor.name === "Error",
         "Throw an internal exception.("+ e +")");
@@ -128,15 +128,16 @@ var MLT = (function () {
       file.append("packs");
       file.append("platform");
       file.append("testing");
+      file.append("testmods");
       file.append("mutated_import.js");
       fileUtils.write(file, "exports.myNumber = 7;");
       imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import");
+        "platform/testing/testmods/mutated_import");
       val_1 = imported.module.myNumber;
       imported.kill();
       fileUtils.write(file, "exports.myNumber = 9;");
       imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import");
+        "platform/testing/testmods/mutated_import");
       val_2 = imported.module.myNumber;
       imported.kill();
 
@@ -146,7 +147,7 @@ var MLT = (function () {
       // test restart
       fileUtils.write(file, "exports.myNumber = 7;");
       imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/mutated_import");
+        "platform/testing/testmods/mutated_import");
       val_1 = imported.module.myNumber;
       fileUtils.write(file, "exports.myNumber = 9;");
       val_2 = imported.restart().module.myNumber;
@@ -158,7 +159,7 @@ var MLT = (function () {
     (function () {
       var scopes,
           ml = BACKSTAGE.getModuleLoader("resource://kixx/packs/");
-      scopes = ml("platform/testing/eval_globals").module;
+      scopes = ml("platform/testing/testmods/eval_globals").module;
       assert(typeof scopes.checkBackstage() === "object",
         "backstage scope should not be available. "+
         "("+ typeof scopes.checkBackstage() +")");
@@ -187,7 +188,7 @@ var MLT = (function () {
 
     (function () {
       var mod = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/reload").module;
+        "platform/testing/testmods/reload").module;
       assert(typeof mod.val_1 === "number", "val_1 is a number");
       assert(typeof mod.val_2 === "number", "val_2 is a number");
       assert(mod.val_1 !== mod.val_2, "mod.val_1 !== mod.val_2");
@@ -196,24 +197,24 @@ var MLT = (function () {
     (function () {
      var loader, listing, compliance, security;
 
-     loader = BACKSTAGE.getModuleLoader("resource://kixx/packs/platform/interoperablejs/trivial/");
+     loader = BACKSTAGE.getModuleLoader("resource://kixx/packs/platform/testing/interoperablejs/trivial/");
      loader("program");
 
      listing = fileUtils.open("Kixx");
      listing.append("packs");
      listing.append("platform");
+     listing.append("testing");
      listing.append("interoperablejs");
 
      compliance = listing.clone();
      compliance.append("compliance");
      fileUtils.contents(compliance).forEach(
        function (item) {
-         if (item.leafName === "ORACLE") {
-           return;
+         if (item.leafName !== "ORACLE") {
+           BACKSTAGE.getModuleLoader(
+             "resource://kixx/packs/platform/testing/interoperablejs/compliance/"+
+             item.leafName +"/")("program");
          }
-         BACKSTAGE.getModuleLoader(
-           "resource://kixx/packs/platform/interoperablejs/compliance/"+
-           item.leafName +"/")("program");
        });
 
      security = listing.clone();
@@ -225,7 +226,7 @@ var MLT = (function () {
            return;
          }
          BACKSTAGE.getModuleLoader(
-           "resource://kixx/packs/platform/interoperablejs/security/"+
+           "resource://kixx/packs/platform/testing/interoperablejs/security/"+
            item.leafName +"/")("program");
        });
     }());
