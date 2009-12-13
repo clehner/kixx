@@ -14,7 +14,7 @@ exports.log = function log(aMessage) {
   aMessage += ""; // convert to string
   Components.classes["@mozilla.org/consoleservice;1"].
     getService(Components.interfaces.nsIConsoleService).
-    logStringMessage(a);
+    logStringMessage(aMessage);
 };
 
 /**
