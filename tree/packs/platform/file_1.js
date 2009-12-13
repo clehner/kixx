@@ -113,11 +113,27 @@ exports.write = function file_write(aFile, aContent, aAppend) {
 exports.contents = function file_contents(aFile) {
   var list = [], file;
 
-  while(aFile.directoryEntries.hasMoreElements())
-  {
-    file = aFile.directoryEntries.getNext();
-    file.QueryInterface(Components.interfaces.nsIFile);
-    list.push(file);
+  if (!aFile.exists) {
+    throw new Error(module.id+"::contents(): Passed directory "+ aFile.path
+        +" does not exist. Called by "+ file_contents.caller.name +
+        "() in process "+ require.main);
+  }
+
+  if (!aFile.isDirectory()) {
+    throw new Error(module.id+"::contents(): Passed directory "+ aFile.path
+        +" is not a directory. Called by "+ file_contents.caller.name +
+        "() in process "+ require.main);
+  }
+
+  try {
+    while(aFile.directoryEntries.hasMoreElements()) {
+      file = aFile.directoryEntries.getNext();
+      file.QueryInterface(Components.interfaces.nsIFile);
+      list.push(file);
+    }
+  } catch(e) {
+    throw new Error(module.id+"::contents(): Got unexpected error '"+ e +
+        "'. Called by "+ file_contents.caller.name +"() in process "+ require.main);
   }
 
   // todo: how cool would it be to return an iterator instead???
