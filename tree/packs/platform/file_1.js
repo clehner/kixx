@@ -23,8 +23,8 @@ exports.open = function file_open(aLoc) {
     case "Kixx":
       return Components.classes["@mozilla.org/extensions/manager;1"].
                getService(Components.interfaces.nsIExtensionManager).
-               getInstallLocation(exports.mozId).
-               getItemLocation(exports.mozId);
+               getInstallLocation(mozId).
+               getItemLocation(mozId);
 
     default:
       // todo: use the debug module to handle errors
