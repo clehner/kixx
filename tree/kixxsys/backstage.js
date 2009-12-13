@@ -1,5 +1,5 @@
 /**
- * @fileOverview Bootsrap Kixx BACKSTAGE object
+ * @fileOverview Bootstrap Kixx BACKSTAGE object
  */
 
 /*jslint
@@ -149,7 +149,8 @@ function () {
               req.open("GET", aURL, false);
             } catch(openEx) {
               // this is better than the native error
-              throw new Error("Could not load invalid uri "+ aURL);
+              throw new Error(
+                  "Module loader.fetch() could not load invalid uri "+ aURL);
             }
 
             // todo: use a timer so this does not block
@@ -158,7 +159,10 @@ function () {
               req.send(null);
             } catch(sendEx) {
               // this is better than the native error
-              throw new Error("Could not find uri "+ aURL);
+              throw new Error(
+                  "Module loader.fetch() could not find uri "+ aURL +
+                  ". Called by "+
+                  fetch.caller.caller.caller.caller.name +"().");
             }
             return req.responseText;
           }
@@ -219,6 +223,7 @@ function () {
             if (!ml_factoryCache.hasOwnProperty(aURI)) {
               ml_factoryCache[aURI] = evaluate(fetch(aURI), aURI);
             }
+            ml_factoryCache[aURI].name = aURI;
             return ml_factoryCache[aURI];
           }
 
