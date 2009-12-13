@@ -29,7 +29,7 @@ function main() {
           chromeWin.document.getElementById(buttonId).
             addEventListener("command",
             function onToolbarButtonCommand(e) {
-              require("../launcher_1").open(function(){});
+              require("platform/tabs_1").create({});
             }, true);
         } catch(e) {
           // if the user has removed the button, it will not be there.
@@ -42,7 +42,7 @@ function main() {
 
       // check to see if we have installed the button before
       annodb.get("toolbar-button-installed", utils.MOZID,
-      function(success, result) {
+      function installToolbarButton(success, result) {
         var toolbarId = "nav-bar", // id of the firefox toolbar
 
             // id of the button our toolbar button will follow (the home button) 
