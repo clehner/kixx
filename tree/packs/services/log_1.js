@@ -47,10 +47,10 @@ function sendout(aLevel, aLevelDesc, aMessage)
 {
   var msg = formatMessage(aLevelDesc, aMessage);
   if(aLevel < 60) {
-    require("platform/utils_1").console.log(msg);
+    require("platform/console_1").log(msg);
   }
   else
-    require("platform/utils_1").console.err(msg);
+    require("platform/console_1").err(msg);
 
   // todo: rotate log files
   if(LOG_TO_FILE)
