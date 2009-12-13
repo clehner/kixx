@@ -2,67 +2,59 @@
 var LOG_TO_FILE = true;
 var FILE = "kixx.log";
 
-exports.logToFile = function log_logToFile(aBool)
-{
+exports.logToFile = function log_logToFile(aBool) {
   // todo: catch bad params
   LOG_TO_FILE = aBool;
 }
 
-exports.fatal = function log_fatal(a)
-{
+exports.fatal = function log_fatal(a) {
   sendout(70, "Fatal", a);
 }
 
-exports.error = function log_error(a)
-{
+exports.error = function log_error(a) {
   sendout(60, "Error", a);
 }
 
-exports.warn = function log_warn(a)
-{
+exports.warn = function log_warn(a) {
   sendout(50, "Warn", a);
 }
 
-exports.info = function log_info(a)
-{
+exports.info = function log_info(a) {
   sendout(40, "Info", a);
 }
 
-exports.config = function log_config(a)
-{
+exports.config = function log_config(a) {
   sendout(30, "Config", a);
 }
 
-exports.debug = function log_debug(a)
-{
+exports.debug = function log_debug(a) {
   sendout(20, "Debug", a);
 }
 
-exports.trace = function log_trace(a)
-{
+exports.trace = function log_trace(a) {
   sendout(10, "Trace", a);
 }
 
-function sendout(aLevel, aLevelDesc, aMessage)
-{
-  var msg = formatMessage(aLevelDesc, aMessage);
+function sendout(aLevel, aLevelDesc, aMessage) {
+  var msg = formatMessage(aLevelDesc, aMessage),
+      logfile;
+
   if(aLevel < 60) {
     require("platform/console_1").log(msg);
   }
-  else
+  else {
     require("platform/console_1").err(msg);
+  }
 
   // todo: rotate log files
-  if(LOG_TO_FILE)
-  {
-    var logfile = require("platform/utils_1").file.open("Profile");
+  if(LOG_TO_FILE) {
+    logfile = require("platform/file_1").open("Profile");
     logfile.append(FILE);
     file.write(logfile, msg +"\n", true);
   }
 }
 
-function formatMessage(aLevelDesc, aMessage)
-{
+function formatMessage(aLevelDesc, aMessage) {
   var str = aMessage;
   if(typeof aMessage == "object")
     str = formatError(aMessage); // todo: detect objects that are not errors
@@ -75,8 +67,7 @@ function formatMessage(aLevelDesc, aMessage)
   return rv;
 }
 
-function formatError(aE)
-{
+function formatError(aE) {
   var m, n, r, l, ln, fn = "";
   try {
     m  = aE.message;
