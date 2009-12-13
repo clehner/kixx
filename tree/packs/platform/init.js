@@ -29,7 +29,8 @@ function main() {
           chromeWin.document.getElementById(buttonId).
             addEventListener("command",
             function onToolbarButtonCommand(e) {
-              require("platform/tabs_1").create({});
+              require("platform/tabs_1").create(
+                {url: "chrome://kixx/content/packs/platform/panel/panel.html"});
             }, true);
         } catch(e) {
           // if the user has removed the button, it will not be there.
@@ -46,7 +47,7 @@ function main() {
         var toolbarId = "nav-bar", // id of the firefox toolbar
 
             // id of the button our toolbar button will follow (the home button) 
-            afterId = "home-button"
+            afterId = "home-button",
             
             tb = chromeWin.document.getElementById(toolbarId),
 
@@ -60,6 +61,7 @@ function main() {
           return;
         }
 
+        dump(tb.currentSet.indexOf(buttonId) +"\n");
         // if the toolbar button is already there,
         // we don't want to re-install it.
         if(tb.currentSet.indexOf(buttonId) != -1) {
