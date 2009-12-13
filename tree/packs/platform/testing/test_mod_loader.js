@@ -194,7 +194,7 @@ var MLT = (function () {
       assert(mod.val_1 !== mod.val_2, "mod.val_1 !== mod.val_2");
     }());
 
-    (function () {
+    (function testInteroperableJS() {
      var loader, listing, compliance, security;
 
      loader = BACKSTAGE.getModuleLoader("resource://kixx/packs/platform/testing/interoperablejs/trivial/");
