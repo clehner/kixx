@@ -4,16 +4,21 @@
 
 // main function (run from backstage)
 function main() {
-  var log = require("services/log_1"),
-      utils = require("platform/utils_1");
+  // todo: #notCrossPlatform
+  // We need to determine what platform we are on before
+  // installing the toolbar button
 
-  require("./windows_1").getCurrent(
-    function loadToolbarButton(aChromeWin) {
-      var annodb = require("services/annodb_1");
+  var log = require("services/log_1"),
+      utils = require("platform/firefox/utils_1"),
+      annodb = require("services/annodb_1"),
 
       // todo: there should be a constant for the toolbar-button id
       // (global constants module or something)
-      var buttonId = "kixx-launcher-toolstrip";
+      buttonId = "kixx-launcher-toolstrip",
+      
+      chromeWin;
+      
+      chromeWin = utils.getMostRecentChromeWindow();
 
       function addToolbarButtonListener() {
         // todo: using this method of event registration, if the user removed the
@@ -21,7 +26,7 @@ function main() {
         // registered.
         try {
           // add the event listener
-          aChromeWin.document.getElementById(buttonId).
+          chromeWin.document.getElementById(buttonId).
             addEventListener("command",
             function onToolbarButtonCommand(e) {
               require("../launcher_1").open(function(){});
@@ -43,7 +48,7 @@ function main() {
             // id of the button our toolbar button will follow (the home button) 
             afterId = "home-button"
             
-            tb = aChromeWin.document.getElementById(toolbarId),
+            tb = chromeWin.document.getElementById(toolbarId),
 
             // the set of new buttons
             newButtonSet;
@@ -71,10 +76,10 @@ function main() {
         tb.setAttribute("currentset", newButtonSet);
         tb.currentSet = newButtonSet;
 
-        aChromeWin.document.persist("nav-bar", "currentset");
+        chromeWin.document.persist("nav-bar", "currentset");
         // If you don't do the following call, funny things happen
         try {
-          aChromeWin.BrowserToolboxCustomizeDone(true);
+          chromeWin.BrowserToolboxCustomizeDone(true);
         }
         catch (e) { }
         annodb.set("toolbar-button-installed", 1, utils.MOZID, function(){});
@@ -82,7 +87,6 @@ function main() {
         addToolbarButtonListener();
         return;
       });
-    });
 }
 
 if (require.main === module.id) {
