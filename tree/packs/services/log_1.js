@@ -37,6 +37,7 @@ exports.trace = function log_trace(a) {
 
 function sendout(aLevel, aLevelDesc, aMessage) {
   var msg = formatMessage(aLevelDesc, aMessage),
+      fileUtils = require("platform/file_1"),
       logfile;
 
   if(aLevel < 60) {
@@ -48,9 +49,9 @@ function sendout(aLevel, aLevelDesc, aMessage) {
 
   // todo: rotate log files
   if(LOG_TO_FILE) {
-    logfile = require("platform/file_1").open("Profile");
+    logfile = fileUtils.open("Profile");
     logfile.append(FILE);
-    file.write(logfile, msg +"\n", true);
+    fileUtils.write(logfile, msg +"\n", true);
   }
 }
 
