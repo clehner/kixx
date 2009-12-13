@@ -138,7 +138,7 @@ function () {
            * @returns {string} The text body of the resource.
            */
           function fetch(aURL) {
-            var req = new XMLHttpRequest();
+            var req = new XMLHttpRequest(), info;
 
             aURL = aURL + ".js";
 
@@ -159,10 +159,12 @@ function () {
               req.send(null);
             } catch(sendEx) {
               // this is better than the native error
+              info = (fetch.caller.caller.caller ?
+                  fetch.caller.caller.caller.caller.name :
+                  fetch.caller.caller.name);
               throw new Error(
                   "Module loader.fetch() could not find uri "+ aURL +
-                  ". Called by "+
-                  fetch.caller.caller.caller.caller.name +"().");
+                  ". Called by "+ info +"().");
             }
             return req.responseText;
           }
@@ -280,7 +282,7 @@ function () {
                             factoryEx.message,
                             factoryEx.lineNumber,
                             deliberateEx.lineNumber,
-                            228);
+                            235);
           // todo: the offset number (the last param to moduleError() is
           // dependent on how many lines we are from the evaluation point in
           // this file, and as such, is subject to failure if any code changes
