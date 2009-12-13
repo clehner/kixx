@@ -120,7 +120,7 @@ var MLT = (function () {
         "Throw an internal exception.("+ e +")");
     }
 
-    fileUtils = BACKSTAGE.getModuleLoader("resource://kixx/packs/")("services/os_1").module.file;
+    fileUtils = BACKSTAGE.getModuleLoader("resource://kixx/packs/")("platform/file_1").module;
 
     (function () {
       var file, val_1, val_2, imported;

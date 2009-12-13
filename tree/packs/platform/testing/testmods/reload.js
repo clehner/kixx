@@ -1,4 +1,4 @@
-var fileUtils = require("services/os_1").file;
+var fileUtils = require("platform/file_1");
 
 var file = fileUtils.open("Kixx");
 file.append("packs");
