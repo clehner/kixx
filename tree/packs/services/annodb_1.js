@@ -153,7 +153,7 @@ exports.get = function get(aKey, aNamespace, aCallback)
 
 function getConnection()
 {
-  var f = require("services/os_1").file.open("Profile");
+  var f = require("platform/file_1").open("Profile");
   f.append("kixx_annodb.sqlite");
   var ss = Components.classes["@mozilla.org/storage/service;1"]
     .getService(Components.interfaces.mozIStorageService);
