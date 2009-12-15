@@ -111,7 +111,7 @@ exports.write = function file_write(aFile, aContent, aAppend) {
  * @returns {array} The contents of the folder as a list of file objects.
  */
 exports.contents = function file_contents(aFile) {
-  var list = [], file;
+  var list = [], file, entries;
 
   if (!aFile.exists) {
     throw new Error(module.id+"::contents(): Passed directory "+ aFile.path
@@ -125,10 +125,14 @@ exports.contents = function file_contents(aFile) {
         "() in process "+ require.main);
   }
 
+  // we need this assignment to prevent infinite recursion
+  entries = aFile.directoryEntries;
+
   try {
-    while(aFile.directoryEntries.hasMoreElements()) {
-      file = aFile.directoryEntries.getNext();
+    while(entries.hasMoreElements()) {
+      file = entries.getNext();
       file.QueryInterface(Components.interfaces.nsIFile);
+      dump("opened file "+ file.path +"\n");
       list.push(file);
     }
   } catch(e) {
