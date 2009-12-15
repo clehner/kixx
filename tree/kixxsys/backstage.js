@@ -29,8 +29,12 @@ XMLHttpRequest: false
 var BACKSTAGE = {};
 
 /**
+ * @constructor Creates an error object with adusted line numbers.
+ * This type of error is used when an error is raised while evaluating or
+ * invoking a module factory function.
  */
-BACKSTAGE.moduleError = function moduleError(aFilename, aMsg, aEvalLine, aRaisedLine, aOffset) {
+BACKSTAGE.moduleError =
+function moduleError(aFilename, aMsg, aEvalLine, aRaisedLine, aOffset) {
     var newEx = new Error(aMsg);
     newEx.fileName = aFilename || "unknown";
     newEx.lineNumber = (aEvalLine - aRaisedLine) + aOffset;
@@ -72,21 +76,116 @@ BACKSTAGE.platform = (function constructPlatform() {
 var exports = BACKSTAGE.chiron = {};
 
 window.addEventListener("load",
-function () {
+function onBackstageWindowLoad() {
+  var processes = {}, moduleCache;
 
-  // cache object to contain all loaded processes 
-  // between open windows
-  var cache = (function constructModuleCache() {
-      // todo: we need to detect what browser platform we are running on before
-      // constructing this object.
-      // Components.utils.import() only works on Firefox
-      return Components.utils.import(
-        "resource://kixx/kixxsys/cache.js", null).CACHE;
-    }()),
-  
-      chiron = {urls: {}};
+  BACKSTAGE.platform.console.log("Starting Kixx BACKSTAGE");
 
-  BACKSTAGE.chiron.urls(null, chiron.urls, null);
+  /**
+   * Fetches the text contents of the resource located at the given URL.
+   * !Note: The '.js' suffix is appended to all passed URLs
+   * @param {string} aURL The URL to fetch.
+   * @returns {string} The text body of the resource.
+   */
+  function fetch(aURL) {
+    var req = new XMLHttpRequest(), info;
+
+    aURL = aURL + ".js";
+
+    // we do this because we don't want XHR to try to create a DOM
+    req.overrideMimeType("text/plain");
+
+    try {
+      req.open("GET", aURL, false);
+    } catch(openEx) {
+      // this is better than the native error
+      throw new Error(
+          "Module loader.fetch() could not load invalid uri "+ aURL);
+    }
+
+    // todo: use a timer so this does not block
+    // for too long without raising an exception
+    try {
+      req.send(null);
+    } catch(sendEx) {
+      // this is better than the native error
+      info = (fetch.caller.caller.caller ?
+          fetch.caller.caller.caller.caller.name :
+          fetch.caller.caller.name);
+      throw new Error(
+          "Module loader.fetch() could not find uri "+ aURL +
+          ". Called by "+ info +"().");
+    }
+    return req.responseText;
+  }
+
+  /**
+   * Evaluates JavaScript module text by the current engine.
+   * @param {string} aText The text to evaluate.
+   * @param {string} [aURL] The location of the text (used for error reporting)
+   * @returns {function} The factory function for a module.
+   */
+  function evaluate(aText, aURI) {
+    aURI = aURI || "unknown";
+    return BACKSTAGE.evaluate(
+        ("(function (exports, require, module, sys, system) {" + aText +"})"),
+        aURI);
+    // The second system parameter is there for backward compatability with
+    // modules that use "system" instead of "sys"
+  }
+
+  /**
+   * Fetch a JavaScript module text, evaluate it, and return the resulting
+   * module factory function.
+   *
+   * @param {string} aURI The URI of the module to load.
+   */
+  function load(aURI) {
+    var factory;
+
+    if (typeof aURI !== "string") {
+      throw new Error(
+          "load() was passed unexpected non-string parameter: "+ aURI);
+    }
+
+    factory = evaluate(fetch(aURI), aURI);
+
+    factory.name = aURI; // for debugging
+    return factory;
+  }
+
+  function constructUrlResolver(aPath) {
+    var urls = {}; // will be the urls module from Chiron
+
+    BACKSTAGE.chiron.urls(null, urls, null);
+
+    /**
+     * This function must return a top-level module identifier given any other
+     * valid CommonJS module identifier. The given identifier may be relative
+     * to the base identifer or a top-level identifier itself, in which case
+     * the base identifier is ignored. If the module loader supports module
+     * identifiers outside the CommonJS module identifier domain, resolve must
+     * return some form of canonical module identifier acceptable by
+     * require(canonicalId)
+     *
+     * @param {string} aURL Relative or base URL.
+     * @param {string} [aBaseURL] The optional base URL to resolve from.
+     */
+    function resolve(aURL, aBaseURL) {
+      if (typeof aURL !== "string") {
+          throw new Error("URL '" + aURL +
+              "' passed to resolve() is not a string.");
+      }
+
+      if (!aBaseURL || aURL[0] !== ".") {
+        aBaseURL = aPath;
+      }
+
+      return urls.resolve(aURL, aBaseURL);
+    }
+
+    return resolve;
+  }
 
   // constructor for the 'sys' or 'system' object
   function constructSys() {
@@ -99,279 +198,124 @@ function () {
     return {platform: BACKSTAGE.platform, print: print};
   }
 
-  // constructor for a module loader (require()) sandbox.
-  // getModuleLoader() is called with the desired path of this module loading
-  // system. The require() function is rebuilt for injection into a new module
-  // each time a non-cached module is loaded.
-  function getModuleLoader(ml_path) {
-    // members of this module loader instance are prefixed with 'ml_'
-    var ml_sandbox,
-        ml_Require,
-        ml_main,
-        
-        ml_system = constructSys(),
+  // There is one single module loading system cache that is shared among all
+  // processes.  It is designed so that developers using the module system can
+  // restart it during development without restarting the platform browser.
+  // There is also an option for users to spawn new processes and those
+  // processes each construct their own cache.
+  moduleCache = {};
 
-        // cache object to contain all loaded modules
-        // between open windows
-        ml_moduleCache,
-
-        // cache object to contain all loaded factory function
-        // between open windows
-        ml_factoryCache,
-
-        /**
-         */
-        ml_loader;
-      
-    ml_path = ml_path || "";
-    if (typeof ml_path !== "string") {
-      throw new Error("Unexpected module id passed to module loader: "+ ml_path);
+  // constructor for the require object/function made available to modules.
+  function constructRequire(aBaseId, aContinuation) {
+    // will become the public require() object for the new module
+    function pub(aId) {
+      if (typeof aId !== "string") {
+        throw new Error("Unexpected module id passed to require(): "+ aId);
+      }
+      return aContinuation.sandbox(aId, aBaseId, aContinuation);
     }
 
-    ml_loader = (function constructLoader() {
-          var loader_pub = {};
+    pub.loader = aContinuation.loader;
+    pub.main = aContinuation.main;
+    return pub;
+  }
 
-          /**
-           * Fetches the text contents of the resource located at the given URL.
-           * !Note: The '.js' suffix is appended to all passed URLs
-           * @param {string} aURL The URL to fetch.
-           * @returns {string} The text body of the resource.
-           */
-          function fetch(aURL) {
-            var req = new XMLHttpRequest(), info;
+  function sandbox(aID, aBaseID, a) {
+    var factory, deliberateEx;
 
-            aURL = aURL + ".js";
+    aID = a.loader.resolve(aID, aBaseID);
 
-            // we do this because we don't want XHR to try to create a DOM
-            req.overrideMimeType("text/plain");
-
-            try {
-              req.open("GET", aURL, false);
-            } catch(openEx) {
-              // this is better than the native error
-              throw new Error(
-                  "Module loader.fetch() could not load invalid uri "+ aURL);
-            }
-
-            // todo: use a timer so this does not block
-            // for too long without raising an exception
-            try {
-              req.send(null);
-            } catch(sendEx) {
-              // this is better than the native error
-              info = (fetch.caller.caller.caller ?
-                  fetch.caller.caller.caller.caller.name :
-                  fetch.caller.caller.name);
-              throw new Error(
-                  "Module loader.fetch() could not find uri "+ aURL +
-                  ". Called by "+ info +"().");
-            }
-            return req.responseText;
-          }
-
-          /**
-           * Evaluates JavaScript module text by the current engine.
-           * @param {string} aText The text to evaluate.
-           * @param {string} [aURL] The location of the text (used for error reporting)
-           * @returns {function} The factory function for a module.
-           */
-          function evaluate(aText, aURI) {
-            // todo: the second System() parameter is there for backward
-            // compatability with modules that use "system" instead of "sys"
-            aURI = aURI || "unknown";
-            return BACKSTAGE.evaluate(("(function (exports, require, module, sys, system) {" +
-                  aText +"})"), aURI);
-          }
-
-          /**
-           * This function must return a top-level module identifier given any other
-           * valid CommonJS module identifier. The given identifier may be relative
-           * to the base identifer or a top-level identifier itself, in which case
-           * the base identifier is ignored. If the module loader supports module
-           * identifiers outside the CommonJS module identifier domain, resolve must
-           * return some form of canonical module identifier acceptable by
-           * require(canonicalId)
-           *
-           * @param {string} aURL Relative or base URL.
-           * @param {string} [aBaseURL] The optional base URL to resolve from.
-           */
-          function resolve(aURL, aBaseURL) {
-            if (typeof aURL !== "string") {
-                throw new Error("Module id '" + aURL + "' is not a string.");
-            }
-            if (!aBaseURL) {
-                aBaseURL = ml_path;
-            }
-            if (aURL[0] !== ".") {
-                aBaseURL = ml_path;
-            }
-            return chiron.urls.resolve(aURL, aBaseURL);
-          }
-
-          /**
-           * Fetch a JavaScript module text, evaluate it, and return the resulting
-           * module factory function.
-           *
-           * @param {string} aURI The URI of the module to load.
-           */
-          function load(aURI) {
-            if (typeof aURI !== "string") {
-              throw new Error("load() was passed unexpected non-string parameter: "+ aURI);
-            }
-            if (!ml_factoryCache) {
-              throw new Error("A process has not been started for this module loader.");
-            }
-
-            if (!ml_factoryCache.hasOwnProperty(aURI)) {
-              ml_factoryCache[aURI] = evaluate(fetch(aURI), aURI);
-            }
-            ml_factoryCache[aURI].name = aURI;
-            return ml_factoryCache[aURI];
-          }
-
-          /**
-           */
-          function reload(aURI) {
-            if (typeof aURI !== "string") {
-              throw new Error("reload() was passed unexpected non-string parameter: "+ aURI);
-            }
-            if (!ml_factoryCache) {
-              throw new Error("A process has not been started for this module loader.");
-            }
-
-            ml_factoryCache[aURI] = evaluate(fetch(aURI), aURI);
-            delete ml_moduleCache[aURI];
-          }
-
-          loader_pub.resolve = resolve;
-          loader_pub.fetch = fetch;
-          loader_pub.evaluate = evaluate;
-          loader_pub.load = load;
-          loader_pub.reload = reload;
-          return loader_pub;
-        }());
-
-    // the sandbox routine that makes all the magic happen
-    // it is passed a module id and returns the loaded module
-    ml_sandbox = function moduleLoaderSandbox(aID, aBaseID) {
-      // members of this sandbox routine are prefixed with 'this_'
-      var this_factory,
-          this_exports,
-          this_require,
-          this_module,
-          this_id = ml_loader.resolve(aID, aBaseID),
-          deliberateEx;
-
-      if (!ml_moduleCache.hasOwnProperty(this_id)) {
-        this_factory = ml_loader.load(this_id);
-        this_exports = ml_moduleCache[this_id] = {};
-        this_require = ml_Require(this_id);
-        this_module = {id: this_id};
-        try {
-          this_factory(
-            this_exports, // exports
-            this_require, // require
-            this_module, // module
-            ml_system, // system as 'sys'
-            ml_system); // system as 'system'
-        } catch(factoryEx) {
-          delete ml_moduleCache[this_id];
-          deliberateEx = new Error();
-          throw BACKSTAGE.moduleError(
-                            aID,
-                            factoryEx.message,
-                            factoryEx.lineNumber,
-                            deliberateEx.lineNumber,
-                            235);
-          // todo: the offset number (the last param to moduleError() is
-          // dependent on how many lines we are from the evaluation point in
-          // this file, and as such, is subject to failure if any code changes
-          // are made between here and there.  Is there a way to set this
-          // programmatically???
-        }
-      }
-
-      return ml_moduleCache[this_id];
-    };
-
-    // construct a require() object
-    ml_Require = function constructRequire(aBaseID) {
-      // will become the public require() object for the new module
-      function pub(aID) {
-        if (typeof aID !== "string") {
-          throw new Error("Unexpected module id passed to require(): "+ aID);
-        }
-        return ml_sandbox(aID, aBaseID);
-      }
-
-      pub.loader = ml_loader;
-      pub.main = ml_main;
-      return pub;
-    };
-
-    /**
-     * The only public entry point to start a process with a module loader
-     */
-    function run(aID) {
-      var pub = {}, processCache, key;
-      
-      if (typeof aID !== "string") {
-        throw new Error("Unexpected module id passed to module loader: "+ aID);
-      }
-
-      // this key is the same as ml_main or require().main
-      key = ml_loader.resolve(aID, ml_path);
-      
+    if (!Object.prototype.hasOwnProperty.call(a.cache, aID)) {
+      factory = a.loader.load(aID);
+      a.cache[aID] = {};
       try {
-        processCache = cache.create(key);
-      } catch(e) {
-        if (e !== ("Shared cache key '"+ key +"' already exists.")) {
-            throw e;
-        }
-        throw new Error("Module loader has already been run for "+ key +
-            ". Called by "+ (run.caller.name || "anonymous") +"()");
+        factory(
+          a.cache[aID], // exports
+          constructRequire(aID, a), // require
+          {id: aID}, // module
+          a.system, // system as 'sys'
+          a.system); // system as 'system'
+      } catch(factoryEx) {
+        delete a.cache[aID];
+        deliberateEx = new Error();
+        throw BACKSTAGE.moduleError(
+                          aID,
+                          factoryEx.message,
+                          factoryEx.lineNumber,
+                          deliberateEx.lineNumber,
+                          192);
+        // todo: the offset number (the last param to moduleError() is
+        // dependent on how many lines we are from the evaluation point in
+        // this file, and as such, is subject to failure if any code changes
+        // are made between here and there.  Is there a way to set this
+        // programmatically???
       }
-
-      ml_moduleCache = processCache.modules = {};
-      ml_factoryCache = processCache.factories = {};
-      ml_main = key;
-
-      pub.kill = function kill() {
-        cache.destroy(key);
-      };
-
-      pub.restart = function restart() {
-        cache.destroy(key);
-        return run(aID);
-      };
-
-      pub.module = ml_sandbox(aID, ml_path);
-
-      return pub;
     }
 
+    return a.cache[aID];
+  }
+
+  // There may be any number of module processes running at any time
+  // which users will start by calling BACKSTAGE.run()
+  function createNewModuleProcess(a) {
+    var continuation = {
+      system: constructSys(),
+      cache: a.cache,
+      loader: {
+        fetch: fetch,
+        evaluate: evaluate,
+        resolve: constructUrlResolver(a.path),
+        load: load
+      },
+      sandbox: sandbox
+    };
+    continuation.main = continuation.loader.resolve(a.id);
+
+    return sandbox(a.id, a.path, continuation);
+  }
+
+  BACKSTAGE.getModuleLoader = function getModuleLoader(aPath) {
+    var resolve = constructUrlResolver(aPath);
+
+    if (typeof aPath !== "string") {
+      throw new Error("Unexpected path passed to run(): "+ aPath);
+    }
+
+    function run(aID, aSpawn) {
+      var main, spawnedCache;
+      
+      main = resolve(aID);
+
+      if (typeof aID !== "string") {
+        throw new Error("Unexpected module id passed to run(): "+ aID);
+      }
+
+      if (!Object.prototype.hasOwnProperty.call(processes, main)) {
+        processes[main] = createNewModuleProcess(
+            {path: aPath, id: aID, cache: moduleCache});
+      } else if (aSpawn) {
+        spawnedCache = {};
+        return createNewModuleProcess(
+            {path: aPath, id: aID, cache: spawnedCache});
+      }
+      return processes[main];
+    }
+    
     run.loader = {
-      fetch: ml_loader.fetch,
-      evaluate: ml_loader.evaluate,
-      resolve: ml_loader.resolve
+      fetch: fetch,
+      evaluate: evaluate,
+      resolve: resolve
     };
 
     return run;
-  }
+  };
 
   (function init() {
-    var ev, procCache = {};
+    var ev;
 
-    BACKSTAGE.getModuleLoader = getModuleLoader;
+    BACKSTAGE.run = BACKSTAGE.getModuleLoader("resource://kixx/packs/");
 
-    BACKSTAGE.run = function run(aID) {
-      if(!procCache.hasOwnProperty(aID)) {
-        procCache[aID] = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(aID);
-      }
-      return procCache[aID];
-    };
-
-    BACKSTAGE.run("platform/init");
+    //BACKSTAGE.run("platform/init");
 
     ev = document.createEvent("Event");
     ev.initEvent("moduleLoaderReady", true, false);

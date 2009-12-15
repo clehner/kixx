@@ -36,9 +36,11 @@ var MLT = (function () {
         typeof BACKSTAGE.getModuleLoader("a/location").loader.resolve +')');
 
     resolve = BACKSTAGE.getModuleLoader("resource://kixx/packs/").loader.resolve;
+
     assert(resolve("resource://kixx/packs/mod") === "resource://kixx/packs/mod",
       'resolve("resource://kixx/packs/mod") ('+
         resolve("resource://kixx/packs/mod") +')');
+
     assert(resolve("resource://kixx/packs/mod", "ignore me") === "resource://kixx/packs/mod",
       'resolve("resource://kixx/packs/mod") ('+
         resolve("resource://kixx/packs/mod") +')');
@@ -54,10 +56,16 @@ var MLT = (function () {
     assert(resolve("../mymod") === "resource://kixx/mymod",
       'resolve("../mymod") ('+
         resolve("../mymod") +')');
+    assert(resolve("rootPack", "resource://kixx/mymods/someOtherPack") ===
+        "resource://kixx/packs/rootPack",
+      'resolve("../mymod") ('+
+        resolve("rootPack", "resource://kixx/mymods/someOtherPack") +')');
 
     fetch = BACKSTAGE.getModuleLoader("resource://kixx/packs/").loader.fetch;
     try {
       fetch("resource://kixx/index.htmlhttp://example.com");
+      assert(false, "An error should be raised for "+
+        "resource://kixx/index.htmlhttp://example.com");
     } catch(openEx) {
       assert(openEx.constructor.name == "Error",
         'openEx.constructor == Error ('+
@@ -65,6 +73,8 @@ var MLT = (function () {
     }
     try {
       fetch("resource://kixx/index.html");
+      assert(false, "An error should be raised for "+
+        "resource://kixx/index.html");
     } catch(sendEx) {
       assert(sendEx.constructor.name == "Error",
         'sendEx.constructor == Error ('+
@@ -72,32 +82,24 @@ var MLT = (function () {
     }
 
     // run JSLint
-    TREADMILL.jslint("../kixxsys/backstage");
+    TREADMILL.jslint("../kixxsys/backstage", {maxlen: 80});
 
     (function () {
       var a, b, err = false;
 
-      a = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/testmods/mutated_import");
+      a = BACKSTAGE.run("platform/testing/testmods/simple");
 
-      try {
-        b = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-          "platform/testing/testmods/mutated_import");
-      } catch(e) {
-        err = true;
-      }
-      assert(err, "module should not load more than once.");
-      a.kill();
+      b = BACKSTAGE.run("platform/testing/testmods/simple");
 
-      a = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/testmods/mutated_import"),
-      a.kill();
-      b = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/testmods/mutated_import");
-      b.kill();
+      // if the second parameter passed to run is not true (spawn),
+      // it returns the already loaded process
+      assert(a === b, "A module loaded without spawn should be the same.");
+
+      b = BACKSTAGE.run("platform/testing/testmods/simple", true);
+      assert(a !== b, "A module loaded with spawn set to true should not be the same.");
     }());
 
-    evaluate = BACKSTAGE.getModuleLoader().loader.evaluate;
+    evaluate = BACKSTAGE.run.loader.evaluate;
     try {
       evaluate("var ok = 'this line is ok';\nif () {");
     } catch(e) {
@@ -106,21 +108,20 @@ var MLT = (function () {
     }
 
     try {
-      a = BACKSTAGE.getModuleLoader("resource://kixx/packs/")("platform/testing/testmods/throw_error");
+      a = BACKSTAGE.run("platform/testing/testmods/throw_error");
     } catch(e) {
       assert(e.lineNumber === 5,
         "Get a correct line number from run().("+ e +" : "+ e.lineNumber +")");
     }
 
     try {
-      BACKSTAGE.getModuleLoader(
-          "resource://kixx/packs/")("platform/testing/testmods/this_module_doesnot_exist");
+      BACKSTAGE.run("platform/testing/testmods/this_module_doesnot_exist");
     } catch(e) {
       assert(e.constructor.name === "Error",
         "Throw an internal exception.("+ e +")");
     }
 
-    fileUtils = BACKSTAGE.getModuleLoader("resource://kixx/packs/")("platform/file_1").module;
+    fileUtils = BACKSTAGE.run("platform/file_1");
 
     (function () {
       var file, val_1, val_2, imported;
@@ -131,26 +132,13 @@ var MLT = (function () {
       file.append("testmods");
       file.append("mutated_import.js");
       fileUtils.write(file, "exports.myNumber = 7;");
-      imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/testmods/mutated_import");
-      val_1 = imported.module.myNumber;
-      imported.kill();
+      imported = BACKSTAGE.run("platform/testing/testmods/mutated_import");
+      val_1 = imported.myNumber;
       fileUtils.write(file, "exports.myNumber = 9;");
-      imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/testmods/mutated_import");
-      val_2 = imported.module.myNumber;
-      imported.kill();
 
-      assert(val_1 !== val_2,
-        "val_1 === val_2, ("+ val_1 +" === "+ val_2 +")");
-
-      // test restart
-      fileUtils.write(file, "exports.myNumber = 7;");
-      imported = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/testmods/mutated_import");
-      val_1 = imported.module.myNumber;
-      fileUtils.write(file, "exports.myNumber = 9;");
-      val_2 = imported.restart().module.myNumber;
+      // this time we spawn a new process
+      imported = BACKSTAGE.run("platform/testing/testmods/mutated_import", true);
+      val_2 = imported.myNumber;
 
       assert(val_1 !== val_2,
         "val_1 === val_2, ("+ val_1 +" === "+ val_2 +")");
@@ -159,7 +147,9 @@ var MLT = (function () {
     (function () {
       var scopes,
           ml = BACKSTAGE.getModuleLoader("resource://kixx/packs/");
-      scopes = ml("platform/testing/testmods/eval_globals").module;
+
+      scopes = ml("platform/testing/testmods/eval_globals");
+
       assert(typeof scopes.checkBackstage() === "object",
         "backstage scope should not be available. "+
         "("+ typeof scopes.checkBackstage() +")");
@@ -184,14 +174,6 @@ var MLT = (function () {
       } catch(e) {
         assert(e.constructor.name === "ReferenceError", "no inner in eval ("+e+")");
       }
-    }());
-
-    (function () {
-      var mod = BACKSTAGE.getModuleLoader("resource://kixx/packs/")(
-        "platform/testing/testmods/reload").module;
-      assert(typeof mod.val_1 === "number", "val_1 is a number");
-      assert(typeof mod.val_2 === "number", "val_2 is a number");
-      assert(mod.val_1 !== mod.val_2, "mod.val_1 !== mod.val_2");
     }());
 
     (function testInteroperableJS() {

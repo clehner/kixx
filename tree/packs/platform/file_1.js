@@ -132,7 +132,6 @@ exports.contents = function file_contents(aFile) {
     while(entries.hasMoreElements()) {
       file = entries.getNext();
       file.QueryInterface(Components.interfaces.nsIFile);
-      dump("opened file "+ file.path +"\n");
       list.push(file);
     }
   } catch(e) {
