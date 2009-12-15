@@ -4,7 +4,7 @@ var FT = (function () {
 
   function assert(condition, message) {
     if (!condition) {
-      throw new Error("Module Loader Testing (assertion failed): "+ message);
+      throw new Error("File Utils Testing (assertion failed): "+ message);
     }
   }
 
@@ -31,16 +31,21 @@ var FT = (function () {
       BACKSTAGE.platform.console.log("Expected Exception: "+ e);
     }
 
-    assert(fu.open("packs/platform/panel").isDirectory(),
-        "packs/platform/panel should be a directory.");
-    assert(fu.open("packs/platform/panel/panel.html").isFile(),
-        "packs/platform/panel/panel.html should be a file.");
+    assert(fu.open("/platform/panel").isDirectory(),
+        "/platform/panel should be a directory.");
+    assert(fu.open("/platform/panel/panel.html").isFile(),
+        "/platform/panel/panel.html should be a file.");
     
     // test our own path property
-    assert(fu.open("packs/platform/panel/panel.html").location ===
-        "packs/platform/panel/panel.html",
-        "path property should be 'packs/platform/panel/panel.html'. ("+
-        fu.open("packs/platform/panel/panel.html").location +")");
+    assert(fu.open("/platform/panel/panel.html").location ===
+        "/platform/panel/panel.html",
+        "path property should be '/platform/panel/panel.html'. ("+
+        fu.open("/platform/panel/panel.html").location +")");
+
+    // test multiple path parameters
+    assert(fu.open("platform", "panel", "panel.html").leafName === "panel.html",
+        "packs/platform/panel/panel.html leaf name should be "+
+        fu.open("platform", "panel", "panel.html").leafName);
   };
 
   return pub;

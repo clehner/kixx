@@ -37,24 +37,14 @@ function constructFileHandle(nsIFile, aPath) {
   return f;
 }
 
-function openLocation(nsIFile, aLoc) {
-  var list, i;
-
-  list = aLoc.split("/");
-  for (i = 0; i < list.length; i += 1) {
-    nsIFile.append(list[i]);
-  }
-
-  return nsIFile;
-}
-
 /**
  * Creates and returns a file object.
  * @param {string} aLoc Currently only "Profile" and "Kixx" are supported
  * @returns {object} A File object
  */
 exports.open = function file_open(aLoc) {
-  var mozId = require("platform/firefox/utils_1").MOZID;
+  var mozId = require("platform/firefox/utils_1").MOZID,
+      path, nsIFile, i;
 
   if (typeof aLoc !== "string") {
     throw new Error(
@@ -75,7 +65,14 @@ exports.open = function file_open(aLoc) {
                getInstallLocation(mozId).
                getItemLocation(mozId), aLoc);
     default:
-      return constructFileHandle(openLocation(file_open("Kixx"), aLoc), aLoc);
+      path = arguments[0].split("/").
+        concat(Array.prototype.slice.call(arguments, 1));
+      path[0] = "packs";
+      nsIFile = file_open("Kixx");
+      for (i = 0; i < path.length; i += 1) {
+        nsIFile.append(path[i]);
+      }
+      return constructFileHandle(nsIFile, "/"+ path.slice(1).join("/"));
   }
 };
 
