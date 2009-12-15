@@ -2,9 +2,41 @@
  * @fileOverview
  */
 
+/*jslint
+onevar: true,
+evil: true,
+undef: true,
+nomen: true,
+eqeqeq: true,
+plusplus: true,
+strict: true,
+immed: true
+*/
+
+/*global
+Components: false,
+exports: true,
+require: false,
+module: false,
+sys: false
+*/
+
+"use strict";
+
 // todo: #notCrossPlatform
 // We need to determine what platform we are on before
 // defining these functions
+
+function openLocation(nsIFile, aLoc) {
+  var list, i;
+
+  list = aLoc.split("/");
+  for (i = 0; i < list.length; i += 1) {
+    nsIFile.append(list[i]);
+  }
+
+  return nsIFile;
+}
 
 /**
  * Creates and returns a file object.
@@ -14,6 +46,12 @@
 exports.open = function file_open(aLoc) {
   var loc,
       mozId = require("platform/firefox/utils_1").MOZID;
+
+  if (typeof aLoc !== "string") {
+    throw new Error(
+        "Unexpected aLoc argument passed to platform/file::open(): '"+ aLoc +
+        "'.  Called by "+ file_open.caller.name +"().");
+  }
 
   switch(aLoc) {
     case "Profile":
@@ -27,9 +65,7 @@ exports.open = function file_open(aLoc) {
                getItemLocation(mozId);
 
     default:
-      // todo: use the debug module to handle errors
-      throw new Error("platform.file.open(): "+
-          "invalid location alias; "+ aLoc);
+      return openLocation(file_open("Kixx"), aLoc);
   }
 
   return Components.classes["@mozilla.org/file/directory_service;1"].
@@ -43,7 +79,7 @@ exports.open = function file_open(aLoc) {
  * @returns {object} The file object passed in.
  */
 exports.create = function file_create(aFile) {
-  aFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
+  aFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 666);
   return aFile;
 };
 
@@ -89,12 +125,12 @@ exports.write = function file_write(aFile, aContent, aAppend) {
 
   if(aAppend) {
     // flags: read and write, create, append
-    fs.init(aFile, 0x02 | 0x08 | 0x10, 0666, 0); 
+    fs.init(aFile, 0x02 | 0x08 | 0x10, 666, 0); 
   }
 
   else {
     // flags: read and write, create, truncate 
-    fs.init(aFile, 0x02 | 0x08 | 0x20, 0666, 0); 
+    fs.init(aFile, 0x02 | 0x08 | 0x20, 666, 0); 
   }
 
   cs.init(fs, "UTF-8", 0, 0);
@@ -114,14 +150,14 @@ exports.contents = function file_contents(aFile) {
   var list = [], file, entries;
 
   if (!aFile.exists) {
-    throw new Error(module.id+"::contents(): Passed directory "+ aFile.path
-        +" does not exist. Called by "+ file_contents.caller.name +
+    throw new Error(module.id+"::contents(): Passed directory "+ aFile.path +
+        " does not exist. Called by "+ file_contents.caller.name +
         "() in process "+ require.main);
   }
 
   if (!aFile.isDirectory()) {
-    throw new Error(module.id+"::contents(): Passed directory "+ aFile.path
-        +" is not a directory. Called by "+ file_contents.caller.name +
+    throw new Error(module.id+"::contents(): Passed directory "+ aFile.path +
+        " is not a directory. Called by "+ file_contents.caller.name +
         "() in process "+ require.main);
   }
 
@@ -136,7 +172,8 @@ exports.contents = function file_contents(aFile) {
     }
   } catch(e) {
     throw new Error(module.id+"::contents(): Got unexpected error '"+ e +
-        "'. Called by "+ file_contents.caller.name +"() in process "+ require.main);
+        "'. Called by "+ file_contents.caller.name +
+        "() in process "+ require.main);
   }
 
   // todo: how cool would it be to return an iterator instead???
