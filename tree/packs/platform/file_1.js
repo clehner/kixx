@@ -33,7 +33,20 @@ function constructFileHandle(nsIFile, aPath) {
   function F() {}
   F.prototype = nsIFile;
   f = new F();
+
   f.location = aPath;
+
+  // todo: include an encoding parameter
+  f.read = function read() {
+    return exports.read(nsIFile);
+  };
+
+  // todo: include an encoding parameter
+  f.write = function write(text, append) {
+    exports.write(nsIFile, text, append);
+    return f;
+  };
+
   return f;
 }
 

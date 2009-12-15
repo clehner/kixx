@@ -44,8 +44,13 @@ var FT = (function () {
 
     // test multiple path parameters
     assert(fu.open("platform", "panel", "panel.html").leafName === "panel.html",
-        "packs/platform/panel/panel.html leaf name should be "+
+        "packs/platform/panel/panel.html leaf name is "+
         fu.open("platform", "panel", "panel.html").leafName);
+
+    // test read method
+    assert(fu.open("/platform/testing/testmods/simple.js").read() ===
+        'exports.yeah = "W00t!";'+"\n",
+        " read() is "+ fu.open("/platform/testing/testmods/simple.js").read());
   };
 
   return pub;
