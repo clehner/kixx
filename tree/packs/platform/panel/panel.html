@@ -5,9 +5,77 @@
 <head id="document-head">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>Kixx Launcher</title>
-  <link rel="stylesheet" type="text/css" href="panel.css" />
-  <script src="../modules.js"></script>
-  <script src="panel.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+      background: #fff;
+      /* todo: fonts too big on windows */
+      font-size: 16px;
+    }
+
+    a {
+      outline: none;
+    }
+
+    a img {
+      border: none;
+    }
+
+    #content {
+      float: right;
+      width: 50%;
+      padding: 1em 2% 1em 2%;
+      background: #fff;
+      color: #222;
+      margin: 1.5em 0 2em 1.5em;
+      font-family: "Lucida Grande";
+    }
+
+    #bike {
+      float: right;
+      padding: 5px;
+      margin: 0 0 1.5em 1.5em;
+    }
+
+    #header {
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+
+    #subheader {
+      font-weight: bold;
+      font-size: 1em;
+    }
+
+    #panel {
+      position: fixed;
+      top: 70px;
+      left: 0px;
+      border-top: 2px solid #222;
+      border-left: 2px solid #222;
+      border-right: 2px solid #222;
+      -moz-border-radius-topright: 15px;
+      -moz-border-radius-bottomright: 15px;
+      background: #222;
+      width: 37%;
+      height: 400px;
+      padding: 2% 2% 2% 1%;
+    }
+
+    .launcher-icon {
+      float: left;
+      display: block;
+      margin-left: 1.5em;
+    }
+  </style>
+  <script src="chrome://kixx/content/packs/modules.js"></script>
+  <script type="text/javascript">
+    window.addEventListener('moduleLoaderReady',
+        function onModuleLoaderReady() {
+          document.getElementById('panel').innerHTML =
+            BACKSTAGE.run('platform/panel/panel_module').module.getPanel();
+        }, false);
+  </script>
 </head>
 
 <body>

@@ -7,15 +7,15 @@ var PACKS_DIR = "packs";
 var MAN_FILE = "manifest.json";
 
 exports.getPanel = function getPanel() {
-  var fileUtils = require("services/os_1").file,
-      console = require("platform/utils_1").console,
+  var fileUtils = require("platform/file_1"),
+      console = require("platform/console_1"),
       panel = "",
       loc;
 
   loc = fileUtils.open("Kixx");
   loc.append(PACKS_DIR);
   fileUtils.contents(loc).forEach(
-      function (file) {
+      function panel_loadManifest(file) {
         var man, name = file.leafName;
         file.append(MAN_FILE);
 
