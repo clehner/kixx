@@ -315,7 +315,7 @@ function onBackstageWindowLoad() {
 
     BACKSTAGE.run = BACKSTAGE.getModuleLoader("resource://kixx/packs/");
 
-    //BACKSTAGE.run("platform/init");
+    BACKSTAGE.run("platform/init");
 
     ev = document.createEvent("Event");
     ev.initEvent("moduleLoaderReady", true, false);
