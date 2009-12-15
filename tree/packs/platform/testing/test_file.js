@@ -35,6 +35,12 @@ var FT = (function () {
         "packs/platform/panel should be a directory.");
     assert(fu.open("packs/platform/panel/panel.html").isFile(),
         "packs/platform/panel/panel.html should be a file.");
+    
+    // test our own path property
+    assert(fu.open("packs/platform/panel/panel.html").location ===
+        "packs/platform/panel/panel.html",
+        "path property should be 'packs/platform/panel/panel.html'. ("+
+        fu.open("packs/platform/panel/panel.html").location +")");
   };
 
   return pub;

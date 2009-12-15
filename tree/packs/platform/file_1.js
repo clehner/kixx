@@ -27,6 +27,16 @@ sys: false
 // We need to determine what platform we are on before
 // defining these functions
 
+function constructFileHandle(nsIFile, aPath) {
+  var f;
+
+  function F() {}
+  F.prototype = nsIFile;
+  f = new F();
+  f.location = aPath;
+  return f;
+}
+
 function openLocation(nsIFile, aLoc) {
   var list, i;
 
@@ -44,8 +54,7 @@ function openLocation(nsIFile, aLoc) {
  * @returns {object} A File object
  */
 exports.open = function file_open(aLoc) {
-  var loc,
-      mozId = require("platform/firefox/utils_1").MOZID;
+  var mozId = require("platform/firefox/utils_1").MOZID;
 
   if (typeof aLoc !== "string") {
     throw new Error(
@@ -55,22 +64,19 @@ exports.open = function file_open(aLoc) {
 
   switch(aLoc) {
     case "Profile":
-      loc = "ProfD";
-      break;
-
+      return constructFileHandle(
+               Components.classes["@mozilla.org/file/directory_service;1"].
+               getService(Components.interfaces.nsIProperties).
+               get("ProfD", Components.interfaces.nsIFile), aLoc);
     case "Kixx":
-      return Components.classes["@mozilla.org/extensions/manager;1"].
+      return constructFileHandle(
+               Components.classes["@mozilla.org/extensions/manager;1"].
                getService(Components.interfaces.nsIExtensionManager).
                getInstallLocation(mozId).
-               getItemLocation(mozId);
-
+               getItemLocation(mozId), aLoc);
     default:
-      return openLocation(file_open("Kixx"), aLoc);
+      return constructFileHandle(openLocation(file_open("Kixx"), aLoc), aLoc);
   }
-
-  return Components.classes["@mozilla.org/file/directory_service;1"].
-           getService(Components.interfaces.nsIProperties).
-           get(loc, Components.interfaces.nsIFile);
 };
 
 /**
