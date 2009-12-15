@@ -252,9 +252,12 @@ function createTestOutputFormatter(stdout) {
  *
  * @param {string} aFile The location of the file using the same annotation
  * as <code>require()</code>.
+ * @param {object} aOptions Options to pass to JSLint.
+ * (See the JSLint documentation in fulljslint.js
+ * for an explanation of the available options.)
  */
-TREADMILL.jslint = function jslint(aFile) {
-  var loader = BACKSTAGE.getModuleLoader().loader;
+TREADMILL.jslint = function jslint(aFile, aOptions) {
+  var loader = BACKSTAGE.run.loader;
 
   if (typeof JSLINT !== "function") {
     throw new Error("chrome://kixx/content/packs/jslint/fulljslint.js "+
@@ -262,7 +265,7 @@ TREADMILL.jslint = function jslint(aFile) {
   }
 
   TREADMILL.appendOutput(
-      (JSLINT(loader.fetch(loader.resolve(aFile))) ?
+      (JSLINT(loader.fetch(loader.resolve(aFile)), aOptions) ?
        "passed" : "failed"), JSLINT.report(false));
 };
 
