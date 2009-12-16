@@ -35,6 +35,9 @@ function constructFileHandle(nsIFile, aPath) {
   f = new F();
 
   f.location = aPath;
+  if (f.isDirectory() && aPath[aPath.length -1] !== "/") {
+    f.location += "/";
+  }
 
   // todo: include an encoding parameter
   f.read = function read() {
@@ -45,6 +48,15 @@ function constructFileHandle(nsIFile, aPath) {
   f.write = function write(text, append) {
     exports.write(nsIFile, text, append);
     return f;
+  };
+
+  f.contents = function contents() {
+    var list = exports.contents(nsIFile), rv = [], i;
+
+    for (i = 0; i < list.length; i += 1) {
+      rv.push(constructFileHandle(list[i], f.location + list[i].leafName));
+    }
+    return rv;
   };
 
   return f;
@@ -78,10 +90,16 @@ exports.open = function file_open(aLoc) {
                getInstallLocation(mozId).
                getItemLocation(mozId), aLoc);
     default:
-      path = arguments[0].split("/").
-        concat(Array.prototype.slice.call(arguments, 1));
-      path[0] = "packs";
-      nsIFile = file_open("Kixx");
+      if (arguments.length === 1) {
+        path = arguments[0].split("/").
+          concat(Array.prototype.slice.call(arguments, 1));
+        path[0] = "packs";
+      } else {
+        path = Array.prototype.slice.call(arguments, 0);
+        path.unshift("packs");
+      }
+
+      nsIFile = file_open("Kixx"); // this call to self is not efficient
       for (i = 0; i < path.length; i += 1) {
         nsIFile.append(path[i]);
       }

@@ -41,16 +41,26 @@ var FT = (function () {
         "/platform/panel/panel.html",
         "path property should be '/platform/panel/panel.html'. ("+
         fu.open("/platform/panel/panel.html").location +")");
+    assert(fu.open("/platform/panel").location ===
+        "/platform/panel/",
+        "path property should be '/platform/panel/'. ("+
+        fu.open("/platform/panel").location +")");
 
     // test multiple path parameters
     assert(fu.open("platform", "panel", "panel.html").leafName === "panel.html",
-        "packs/platform/panel/panel.html leaf name is "+
+        "/platform/panel/panel.html leaf name is "+
         fu.open("platform", "panel", "panel.html").leafName);
 
     // test read method
     assert(fu.open("/platform/testing/testmods/simple.js").read() ===
         'exports.yeah = "W00t!";'+"\n",
         " read() is "+ fu.open("/platform/testing/testmods/simple.js").read());
+
+    // test directory listing
+    assert(fu.open("/platform/testing/testmods/").contents()[0].location ===
+        "/platform/testing/testmods/mutated_import.js",
+        "contents()[0].path is "+
+        fu.open("/platform/testing/testmods/").contents()[0].location);
   };
 
   return pub;
