@@ -64,7 +64,9 @@ function constructFileHandle(nsIFile, aPath) {
 
 /**
  * Creates and returns a file object.
- * @param {string} aLoc Currently only "Profile" and "Kixx" are supported
+ * @param {string} aLoc The location of the file with the packs directory as
+ *   the root. Optionally, additional string arguments can be passed and they
+ *   will be appended onto the path given by aLoc.
  * @returns {object} A File object
  */
 exports.open = function file_open(aLoc) {
@@ -90,20 +92,18 @@ exports.open = function file_open(aLoc) {
                getInstallLocation(mozId).
                getItemLocation(mozId), aLoc);
     default:
-      if (arguments.length === 1) {
-        path = arguments[0].split("/").
-          concat(Array.prototype.slice.call(arguments, 1));
-        path[0] = "packs";
-      } else {
-        path = Array.prototype.slice.call(arguments, 0);
-        path.unshift("packs");
-      }
+      path = aLoc.slice(
+          (aLoc[0] === "/" ? 1 : 0),
+          (aLoc[aLoc.length -1] === "/" ? -1 : aLoc.length)).
+        split("/").
+        concat(Array.prototype.slice.call(arguments, 1));
 
       nsIFile = file_open("Kixx"); // this call to self is not efficient
+      nsIFile.append("packs");
       for (i = 0; i < path.length; i += 1) {
         nsIFile.append(path[i]);
       }
-      return constructFileHandle(nsIFile, "/"+ path.slice(1).join("/"));
+      return constructFileHandle(nsIFile, "/"+ path.join("/"));
   }
 };
 

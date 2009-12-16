@@ -50,6 +50,13 @@ var FT = (function () {
     assert(fu.open("platform", "panel", "panel.html").leafName === "panel.html",
         "/platform/panel/panel.html leaf name is "+
         fu.open("platform", "panel", "panel.html").leafName);
+    assert(fu.open("platform/panel/", "panel.html").leafName === "panel.html",
+        "/platform/panel/panel.html leaf name is "+
+        fu.open("platform/panel/", "panel.html").leafName);
+
+    // test with single root parameter
+    assert(fu.open("/").leafName === "packs",
+        "/ leaf name is "+ fu.open("/").leafName);
 
     // test read method
     assert(fu.open("/platform/testing/testmods/simple.js").read() ===
