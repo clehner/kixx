@@ -4,26 +4,26 @@ function DumpObject() {
   function probeObject(a, aLimit, aSkip, aIndent) {
     var str, i, p;
 
-    if (typeof(a) == "string") {
+    if (typeof(a) === "string") {
       return "{string} '"+ a +"'";
     }
-    if (typeof(a) == "number") {
+    if (typeof(a) === "number") {
       return "{number} "+ a;
     }
-    if (typeof(a) == "boolean") {
+    if (typeof(a) === "boolean") {
       return "{boolean} "+ a;
     }
-    if (a == null) {
+    if (a === null) {
       return "{null}";
     }
-    if (typeof(a) == "undefined") {
+    if (typeof(a) === "undefined") {
       return "{undefined}";
     }
-    if (typeof(a) == "function") {
+    if (typeof(a) === "function") {
       return "{function} "+ a.name ;
     }
 
-    if (typeof(a) == "object") {
+    if (typeof(a) === "object") {
       if (a.length && a.pop && a.push) {
         str = "{array} --\n";
         for (i = 0; i < a.length; i++) {
