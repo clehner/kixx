@@ -113,7 +113,8 @@ exports.open = function file_open(aLoc) {
  * @returns {object} The file object passed in.
  */
 exports.create = function file_create(aFile) {
-  aFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 666);
+  // 432 is the integer == 0660
+  aFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 432);
   return aFile;
 };
 
