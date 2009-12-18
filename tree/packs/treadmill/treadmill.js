@@ -137,10 +137,13 @@ function createTestOutputFormatter(stdout) {
         }
         if (test.result === "error") {
           passed = false;
-          return (str += '<pre>name: '+ test.error.name +
-              "\nmessage: "+ test.error.message +
-              "\nfile: "+ test.error.fileName +
-              "\nline: "+ test.error.lineNumber +'</pre>');
+          if (typeof test.error === "object") {
+            return (str += '<pre>name: '+ test.error.name +
+                "\nmessage: "+ test.error.message +
+                "\nfile: "+ test.error.fileName +
+                "\nline: "+ test.error.lineNumber +'</pre>');
+          }
+          return (str += "<pre>"+ test.error + "</pre>");
         }
         testpoints = arrayMap(points, test.points);
         if (testpoints) {
