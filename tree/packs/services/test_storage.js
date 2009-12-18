@@ -89,54 +89,55 @@ var ST = (function () {
     db.open("test_db").executeStep("SELECT * FROM testing WHERE key='literal'");
     db.open("test_db").executeStep("SELECT * FROM testing WHERE key=:myKey");
 
-    // bindings must be an array
+    // bindings must be a dictionary object
     ex = false;
     try {
-      db.open("test_db").executeStep("SELECT * FROM testing WHERE key='literal'", {myKey: 7});
+      db.open("test_db").executeStep("SELECT * FROM testing WHERE key=:myKey", [7]);
     } catch(e) {
       ex = true;
       BACKSTAGE.platform.console.log("Expected Exception: "+ e);
     }
+    assert(ex, "bindings must be a dictionary object");
 
     ex = false;
     try {
-      db.open("test_db").executeStep("SELECT * FROM testing WHERE key='literal'", [7]);
+      db.open("test_db").executeStep("SELECT * FROM testing WHERE key='literal'", {myParam: 7});
     } catch(e) {
       ex = true;
       BACKSTAGE.platform.console.log("Expected Exception: "+ e);
     }
     assert(ex, "SQL with no params should raise an exception.");
 
-    // we can get away without assigning params
-    assert(!db.open("test_db").executeStep("SELECT * FROM testing WHERE key=?1").hasMore(),
+    // we can get away without assigning params (they default to null)
+    assert(!db.open("test_db").executeStep("SELECT * FROM testing WHERE key=:first").hasMore(),
         "No results when no params are assigned.");
 
     cxn = db.open("test_db");
     cxn.execute("BEGIN EXCLUSIVE TRANSACTION");
     try {
-      cxn.execute("INSERT INTO testing VALUES(?1, ?2)", [1, "the"]);
+      cxn.execute("INSERT INTO testing VALUES(:k, :v)", {k:1, v:"the"});
     } catch(e) {
       ex = true;
       BACKSTAGE.platform.console.log("Expected Exception: "+ e);
     }
     assert(ex, "Insert statement should have a conflict clause.");
 
-    cxn.execute("INSERT OR REPLACE INTO testing VALUES(?1, ?2)", [1, "the"]);
-    cxn.execute("INSERT OR REPLACE INTO testing VALUES(?1, ?2)", [2, null]);
-    cxn.execute("INSERT OR REPLACE INTO testing VALUES(?1, ?2)", [3, "7"]);
-    cxn.execute("INSERT OR REPLACE INTO testing VALUES(?1, ?2)", [4, "Fireworks Project"]);
+    cxn.execute("INSERT OR REPLACE INTO testing VALUES(:k, :v)", {k:1, v:"the"});
+    cxn.execute("INSERT OR REPLACE INTO testing VALUES(:k, :v)", {k:2, v:null});
+    cxn.execute("INSERT OR REPLACE INTO testing VALUES(:k, :v)", {k:3, v:"7"});
+    cxn.execute("INSERT OR REPLACE INTO testing VALUES(:k, :v)", {k:4, v:"Fireworks Project"});
     cxn.execute("COMMIT TRANSACTION");
 
-    cxn.execute("INSERT OR REPLACE INTO testing VALUES(?1, ?2)", [4, "Fireworks Project again"]);
+    cxn.execute("INSERT OR REPLACE INTO testing VALUES(:k, :v)", {k:4, v:"Fireworks Project again"});
 
-    results = cxn.executeStep("SELECT * FROM testing WHERE key=?1 OR key=?2", [2,4]);
+    results = cxn.executeStep("SELECT * FROM testing WHERE key=:k1 OR key=:k2", {k1:2, k2:4});
     ex = 0;
     while(results.hasMore()) {
       ex += 1;
       val = results.next().value;
-      assert(val === (ex === 1 ? "Fireworks Project again" : null),
+      assert(val === (ex === 1 ? null : "Fireworks Project again"),
           "Value should be '"+
-          (ex === 1 ? "Fireworks Project again" : null) +"' ("+ val +")");
+          (ex === 1 ? null : "Fireworks Project again") +"' ("+ val +")");
     }
     assert(ex, "There should have been some results.");
   };

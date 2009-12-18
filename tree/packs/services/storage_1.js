@@ -30,6 +30,17 @@ sys: false
 
 var LOG = require("services/log_1");
 
+function constructRow(aStmt) {
+  var r = {}, i, n;
+
+  for (i = 0; i < aStmt.columnCount; i += 1) {
+    n = aStmt.getColumnName(i);
+    r[n] =  aStmt.row[n];
+  }
+
+  return r;
+}
+
 function constructResultSet(aStmt) {
   var pub = {}, pointer = aStmt.executeStep();
 
@@ -38,10 +49,12 @@ function constructResultSet(aStmt) {
   };
 
   pub.next = function next() {
-    var rv = aStmt.row;
+    var rv;
     if (!pointer) {
       throw "End of result set.";
     }
+    rv = constructRow(aStmt);
+
     pointer = aStmt.executeStep();
     return rv;
   };
@@ -58,25 +71,29 @@ function constructDatabaseHandler(aCxn) {
   var pub = {};
 
   function bindParameters(aStmt, aBindings, aSQL) {
-    var i, msg;
+    var p;
 
-    if (typeof aBindings !== "object" ||
-         !aBindings.hasOwnProperty("length") ||
-         aBindings.constructor.name !== "Array") {
-      throw ("storage::db:executeStep() expects an Array passed as aBindings,"+
-          " not '"+ typeof(aBindings) +"'.");
+    if (!aBindings ||
+        typeof aBindings !== "object" ||
+        aBindings.constructor.name === "Array") {
+      throw ("storage::db:"+ bindParameters.caller.name +
+          "() expects an dictionary object passed as aBindings, not '"+
+          aBindings.constructor.name +"'.");
     }
 
-    for (i = 0; i < aBindings.length; i += 1) {
-      try {
-        aStmt.bindStringParameter(i, aBindings[i]);
-      } catch(e) {
-        msg = ("Storage SQL error: no parameter "+ (i + 1) +" in '"+
-               aSQL +"'. Called by "+ bindParameters.caller.caller.name +"()");
-        LOG.warn(msg);
-        throw msg;
+    for (p in aBindings) {
+      if(Object.prototype.hasOwnProperty.call(aBindings, p)) {
+        try {
+          aStmt.getParameterIndex(":"+ p);
+        } catch(e) {
+          throw ("storage::db:"+ bindParameters.caller.name +
+              "() could not find a named parameter for "+ p +
+              " in "+ aSQL +".");
+        }
+        aStmt.params[p] = aBindings[p];
       }
     }
+
     return aStmt;
   }
 
