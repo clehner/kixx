@@ -1,15 +1,9 @@
-//
-// todo: use 'debug' module for errors
-//
-
-// todo: this functionality should be moved into a firefox specific module.
-// the memcache module should remain platform agnostic
-var shell = Components.classes["@mozilla.org/appshell/appShellService;1"]
-          .getService(Components.interfaces.nsIAppShellService);
-var parentElement = shell.hiddenDOMWindow.document.documentElement;
-var iframe = parentElement.ownerDocument.getElementById("backstage");
-var backstage = iframe.contentWindow;
-var TABLE = {};
+// todo: wicked bad hack,
+// assigning to the BACKSTAGE object should not be allowed
+if (!BACKSTAGE.memcache) {
+  BACKSTAGE.memcache = {};
+}
+var TABLE = BACKSTAGE.memcache;
 
 /**
  * Sets a key's value, regardless of previous contents in cache.
