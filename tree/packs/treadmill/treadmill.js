@@ -15,6 +15,8 @@
  * or
  * <br /><code>&lt;script
  * src="chrome://kixx/content/packs/treadmill/treadmill.js"...&gt;</code>
+ * as well as
+ * <code>chrome://kixx/content/packs/modules.js</code>.
  * </p><p>
  * Your test runner html document must have a container
  * (<code>&lt;div&gt;</code>)
@@ -22,14 +24,7 @@
  * <code>id="treadmill"</code>
  * where the results of the JSLint scans and Simpletest output will be
  * displayed.
- * </p><p>
- * <b>Important!:
- * <code>treadmill.js</code>
- * injects the
- * <code>require()</code>
- * function into the global namespace of the testrunner html document, enabling
- * use of the JavaScript module system within Kixx.
- * </b>
+ * </p>
  */
 
 /*jslint
@@ -46,68 +41,6 @@ immed: true
 /*global dump: false, window: true, Components: false, JSLINT: false, document: false*/
 
 "use strict";
-
-/**
- * <p>This script tries to intelligently insert the BACKSTAGE object into the
- * global namespace.  The BACKSTAGE object lives on the background page and is
- * not immediately available when the browser starts up. Normally this is not a
- * problem except in the case where the user has set the browser to open with a
- * page that depends on the availability of the BACKSTAGE object.
- * </p><p>
- * Therefore, this script first defines a BACKSTAGE.getModuleLoader() function
- * that throws an error when called.  When the Kixx platform and the current
- * window are both loaded the BACKSTAGE.getModuleLoader() function is redefined
- * and a special event is fired on the window called "moduleLoaderReady".
- * Content pages can be notified that the BACKSTAGE object is ready for use by
- * listening to the "moduleLoaderReady" DOM event to be fired on the window.
- * </p>
- */
-var BACKSTAGE = null;
-
-(function () {
-  var loaderReady = false,
-      thisLoaded = false,
-      notified = false,
-      
-      bg = Components.classes["@mozilla.org/appshell/appShellService;1"].
-                  getService(Components.interfaces.nsIAppShellService).
-                  hiddenDOMWindow.document.getElementById("backstage").
-                  contentWindow;
-
-  function checkAndLoad() {
-    if (notified) {
-      return;
-    }
-
-    if ((loaderReady || bg.BACKSTAGE.run) && thisLoaded) {
-      notified = true;
-      BACKSTAGE = bg.BACKSTAGE;
-      var ev = document.createEvent("Event");
-      ev.initEvent("moduleLoaderReady", true, false);
-      window.dispatchEvent(ev);
-    }
-  }
-
-  function onModuleLoaderReady() {
-    loaderReady = true;
-    checkAndLoad();
-  }
-
-  // listen for the special "moduleLoaderReady" event from the background page
-  bg.addEventListener("moduleLoaderReady", onModuleLoaderReady, false);
-
-  window.addEventListener("unload",
-      function treadmill_onUnload() {
-        // prevent a leak when the window is reloaded
-        bg.removeEventListener("moduleLoaderReady", onModuleLoaderReady, false);
-      }, false);
-
-  window.addEventListener("load",
-      function (ev) {
-        thisLoaded = true;
-        checkAndLoad();
-      }, false);
-}());
 
 /**
  * @namespace TREADMILL will be added to the global namespace.
@@ -280,7 +213,7 @@ TREADMILL.jslint = function jslint(aFile, aOptions) {
  * @param {object[]} aTests A list of objects with the following members:
  *  <br />{function} test The test function (will be passed the test
  *  object)
- *  <br />{integer} time The time limit for the test before it times out
+ *  <br />{integer} time The time lieit for the test before it times out
  *  in milliseconds
  * @param {function} aCallback Will be called when the test suite is done running.
  */
