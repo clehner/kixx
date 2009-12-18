@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+  <title>Treadmill: AnnoDB.</title>
+
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      font: bold 14px "Terminus", "Lucida Console", "Terminal", "Courier New", Courier, fixed, monospace;
+      color: #0c0;
+      background: #000;
+    }
+
+    #header {
+      padding: 0.5em 0 0.5em 10%;
+      font: bold 2em serif;
+      color: #555;
+    }
+
+    #button {
+      margin: 1em 0 40px 10%;
+      padding: 0.1em 0 0.1em 0;
+      text-align: center;
+      width: 5em;
+      font: bold 2em sans-serif;
+      color: #555;
+      border: 2px solid #555;
+      cursor: pointer;
+    }
+
+    #treadmill > div {
+      margin: 0 10% 40px 10%;
+      font-size: 1.3em;
+      padding: 1em 1em 1em 2em;
+      border: 2px solid #555;
+    }
+
+    #treadmill > div > h4 {
+      margin-left: 7%;
+      font: bold 1.5em serif;
+    }
+
+    #treadmill > div > h5 {
+      margin: 1.2em 0 0.2em 0;
+      font: bold 1.2em serif;
+      color: #555;
+    }
+
+    #treadmill > div > ul {
+      margin-left: 2em;
+    }
+
+    .block-failed {
+      color: #d40;
+    }
+
+    /* jslint error evidence (js code) */
+    .evidence {
+      color: #0c0;
+    }
+  </style>
+
+</head>
+
+<body>
+<div id="header">
+  <h1 id="title">Testing AnnoDB</h1>
+</div>
+<div>
+  <p id="button" onclick="TADB.go();">GO</p>
+</div>
+<div id="treadmill"></div>
+</body>
+<script src="chrome://kixx/content/packs/treadmill/treadmill.js"></script>
+<script src="chrome://kixx/content/packs/jslint/fulljslint.js"></script>
+<script src="chrome://kixx/content/packs/modules.js"></script>
+<script src="test_annodb.js"></script>
+</html>
