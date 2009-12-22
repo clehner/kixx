@@ -11,26 +11,14 @@ function onLoad() {
   var proc;
 
   try {
-    proc = BACKSTAGE.run("fireworksWebCMS/worker");
+    CMS = BACKSTAGE.run("fireworksWebCMS/worker");
   } catch(e) {
     alert(e);
   }
 
-  (function bind() {
-    CMS = {};
-    for (p in proc.module) {
-      if (proc.module.hasOwnProperty(p)) {
-        CMS[p] = proc.module[p];
-      }
-    };
-
-    CMS.restart = function restart() {
-      var newproc = proc.restart();
-      proc = newproc;
-      bind();
-      alert("restarted process");
-    };
-  }());
+  CMS.restart = function restart() {
+    alert("Restart functionality is disabled.");
+  }
 
   // we expect a start function on each page
   start();
